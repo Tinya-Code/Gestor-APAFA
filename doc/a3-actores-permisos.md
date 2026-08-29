@@ -5,14 +5,15 @@
 
 ---
 
-| Actor         | Descripción                                    | Límite                                                |
-| ------------- | ---------------------------------------------- | ----------------------------------------------------- |
-| Administrador | Padre con rol de administrador en la directiva | Acceso completo al sistema                            |
-| Tesorero      | Padre con rol de tesorero en la directiva      | Acceso a operaciones financieras                      |
-| Padre         | Padre sin rol en directiva                     | Solo acceso a su propia información                   |
-| Sistema       | Proceso automático sin intervención humana     | Ejecuta multas, notificaciones y reportes automáticos |
-| Secretaria/o  | Padre con rol de Secretaria/o                  | Toma de notas y asistencia en Eventos.                |
-| vocal         |                                                |                                                       |
-|               |                                                |                                                       |
+| Actor          | Descripción                                                                                   | Límite                                                            |
+| -------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Administrador  | Desarrolladores                                                                               | Acceso de super usuario                                           |
+| Tesorero       | Padre con rol de tesorero en la directiva                                                     | Acceso a operaciones financieras                                  |
+| Padre          | Padre sin rol en directiva                                                                    | Acceso a la pagina web de avisos                                  |
+| Sistema        | Proceso automático sin intervención humana                                                    | Ejecuta multas, notificaciones y reportes automáticos             |
+| Secretaria/o   | Padre con rol de Secretaria/o                                                                 | Toma de notas y asistencia en Eventos.                            |
+| vocal          | Padre de familia con rol  de vocal (apoyo) que puede reemplaza a otro miembro de la directiva | Acceso parcial del sistema (Solo de lectura)                      |
+| Presidente     | Padre de familia con rol de Presidente                                                        | Acceso completo al sistema (solo lectura en el panel de tesorero) |
+| Vicepresidente | Padre de familia con rol de Vicepresidente                                                    | Acceso completo al sistema (solo lectura en el panel de tesorero) |
 
 ---

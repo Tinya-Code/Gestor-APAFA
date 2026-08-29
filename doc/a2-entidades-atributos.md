@@ -25,13 +25,13 @@
 
 ## 🏛️ Directiva
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del miembro directivo.|
-|id_padre|Padre o madre que ocupa el cargo.|
-|rol|Cargo dentro de la directiva (administrador, tesorero, etc.).|
-|fecha_inicio|Fecha en que inicia su gestión.|
-|fecha_fin|Fecha en que termina su gestión.|
+| Propiedad    | Descripción                                                   |
+| ------------ | ------------------------------------------------------------- |
+| id           | Identificador único del miembro directivo.                    |
+| id_padre     | Padre o madre que ocupa el cargo.                             |
+| rol          | Cargo dentro de la directiva (administrador, tesorero, etc.). |
+| fecha_inicio | Fecha en que inicia su gestión.                               |
+| fecha_fin    | Fecha en que termina su gestión.                              |
 
 ## 🗓️ Asamblea
 
@@ -89,17 +89,18 @@
 |fecha_generada|Fecha en que se generó la multa.|
 |fecha_pago|Fecha del pago (si se realizó).|
 
-## 💰 Aporte
+## 💰 ingreso
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del aporte.|
-|id_padre|Padre o madre que realiza el aporte.|
-|id_evento|Evento asociado (si aplica).|
-|id_directiva|Directivo que registra el aporte.|
-|monto|Valor del aporte.|
-|fecha|Fecha del aporte.|
-|descripcion|Motivo o detalle del aporte.|
+| Propiedad    | Descripción                                         |
+| ------------ | --------------------------------------------------- |
+| id           | Identificador único del aporte.                     |
+| id_padre     | Padre o madre que realiza el aporte.                |
+| id_evento    | Evento asociado (si aplica).                        |
+| id_directiva | Directivo que registra el aporte.                   |
+| monto        | Valor del aporte.                                   |
+| fecha        | Fecha del aporte.                                   |
+| descripcion  | Motivo o detalle del aporte.                        |
+| typo         | donacion, multa, aporte voluntario, cuota periodica |
 
 ## 🧾 Comprobante
 
