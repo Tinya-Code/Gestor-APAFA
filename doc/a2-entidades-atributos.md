@@ -1,161 +1,163 @@
-# A2 - b - Entidades y atributos
+# A2 — Entidades y Atributos
 
+---
 
 ## 👨‍👩‍👧 Padre
 
-| Propiedad | Descripción                            |
-| --------- | -------------------------------------- |
-| id        | Identificador único del padre o madre. |
-| nombre    | Nombre del padre o madre.              |
-| apellido  | Apellido del padre o madre.            |
-| dni       | Documento nacional de identidad.       |
-| telefono  | Número de contacto telefónico.         |
-| correo    | Correo electrónico registrado.         |
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del padre o madre |
+| name | Nombre del padre o madre |
+| surname | Apellido del padre o madre |
+| dni | Documento nacional de identidad |
+| phone | Número de contacto telefónico |
+| email | Correo electrónico registrado |
 
 ## 🎓 Estudiante
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del estudiante.|
-|nombre|Nombre del estudiante.|
-|apellido|Apellido del estudiante.|
-|grado|Nivel escolar que cursa.|
-|seccion|Grupo o sección asignada.|
-|id_padre|Referencia al padre o madre responsable.|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del estudiante |
+| name | Nombre del estudiante |
+| surname | Apellido del estudiante |
+| grade | Nivel escolar que cursa |
+| section | Grupo o sección asignada |
+| parent_id | Referencia al padre o madre responsable |
 
 ## 🏛️ Directiva
 
-| Propiedad    | Descripción                                                   |
-| ------------ | ------------------------------------------------------------- |
-| id           | Identificador único del miembro directivo.                    |
-| id_padre     | Padre o madre que ocupa el cargo.                             |
-| rol          | Cargo dentro de la directiva (administrador, tesorero, etc.). |
-| fecha_inicio | Fecha en que inicia su gestión.                               |
-| fecha_fin    | Fecha en que termina su gestión.                              |
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del miembro directivo |
+| parent_id | Padre o madre que ocupa el cargo |
+| role | Cargo dentro de la directiva (admin, presidente, tesorero, etc.) |
+| start_date | Fecha en que inicia su gestión |
+| end_date | Fecha en que termina su gestión |
 
 ## 🗓️ Asamblea
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único de la asamblea.|
-|titulo|Tema o nombre de la reunión.|
-|fecha|Día en que se realiza la asamblea.|
-|descripcion|Detalle o resumen de los temas tratados.|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único de la asamblea |
+| title | Tema o nombre de la reunión |
+| date | Día en que se realiza la asamblea |
+| description | Detalle o resumen de los temas tratados |
 
 ## 📋 Detalle de Asamblea
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del detalle.|
-|id_asamblea|Referencia a la asamblea correspondiente.|
-|descripcion|Nota o acuerdo registrado.|
-|fecha_registro|Fecha en que se registró el detalle.|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del detalle |
+| assembly_id | Referencia a la asamblea correspondiente |
+| description | Nota o acuerdo registrado |
+| registration_date | Fecha en que se registró el detalle |
+| image_url | Foto de la acta |
 
 ## 🎉 Evento
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del evento.|
-|id_asamblea|Relación con una asamblea (si aplica).|
-|titulo|Nombre del evento.|
-|fecha|Día en que se realiza.|
-|descripcion|Breve explicación del evento.|
-|genera_multa|Indica si el evento genera multa por inasistencia.|
-|monto_multa|Valor de la multa (si aplica).|
-|genera_asistencia|Indica si se registra asistencia.|
-|genera_gasto|Indica si el evento implica gastos.|
-|genera_aporte|Indica si se recaudan aportes.|
-|monto_aporte|Valor del aporte (si aplica).|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del evento |
+| assembly_id | Relación con una asamblea (si aplica) |
+| title | Nombre del evento |
+| date | Día en que se realiza |
+| description | Breve explicación del evento |
+| generates_fine | Indica si el evento genera multa por inasistencia |
+| fine_amount | Valor de la multa (si aplica) |
+| generates_attendance | Indica si se registra asistencia |
+| generates_expense | Indica si el evento implica gastos |
+| generates_contribution | Indica si se recaudan aportes |
+| contribution_amount | Valor del aporte (si aplica) |
 
 ## ✅ Asistencia
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del registro.|
-|id_evento|Evento al que corresponde la asistencia.|
-|id_padre|Padre o madre registrado.|
-|asistio|Indica si asistió o no.|
-|fecha_registro|Fecha en que se registró la asistencia.|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del registro |
+| event_id | Evento al que corresponde la asistencia |
+| parent_id | Padre o madre registrado |
+| attended | Indica si asistió o no |
+| registration_date | Fecha en que se registró la asistencia |
 
 ## 💸 Multa
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único de la multa.|
-|id_padre|Padre o madre sancionado.|
-|id_evento|Evento que generó la multa.|
-|monto|Valor de la multa.|
-|pagado|Estado del pago (sí/no).|
-|fecha_generada|Fecha en que se generó la multa.|
-|fecha_pago|Fecha del pago (si se realizó).|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único de la multa |
+| parent_id | Padre o madre sancionado |
+| event_id | Evento que generó la multa |
+| amount | Valor de la multa |
+| paid | Estado del pago (sí/no) |
+| generated_date | Fecha en que se generó la multa |
+| payment_date | Fecha del pago (si se realizó) |
 
-## 💰 ingreso
+## 💰 Ingreso
 
-| Propiedad    | Descripción                                         |
-| ------------ | --------------------------------------------------- |
-| id           | Identificador único del aporte.                     |
-| id_padre     | Padre o madre que realiza el aporte.                |
-| id_evento    | Evento asociado (si aplica).                        |
-| id_directiva | Directivo que registra el aporte.                   |
-| monto        | Valor del aporte.                                   |
-| fecha        | Fecha del aporte.                                   |
-| descripcion  | Motivo o detalle del aporte.                        |
-| typo         | donacion, multa, aporte voluntario, cuota periodica |
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del ingreso |
+| parent_id | Padre o madre que realiza el aporte |
+| event_id | Evento asociado (si aplica) |
+| board_member_id | Directivo que registra el ingreso |
+| amount | Valor del aporte |
+| date | Fecha del aporte |
+| description | Motivo o detalle del aporte |
+| type | donación, multa, aporte voluntario, cuota periódica |
 
 ## 🧾 Comprobante
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del comprobante.|
-|id_directiva|Directivo responsable del registro.|
-|numero_comprobante|Número del documento (factura o boleta).|
-|tipo|Tipo de comprobante emitido.|
-|fecha|Fecha de emisión.|
-|descripcion|Detalle del gasto o compra.|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del comprobante |
+| board_member_id | Directivo responsable del registro |
+| receipt_number | Número del documento (factura o boleta) |
+| type | Tipo de comprobante emitido |
+| date | Fecha de emisión |
+| description | Detalle del gasto o compra |
 
 ## 🧮 Item de Gasto
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del ítem.|
-|id_comprobante|Comprobante al que pertenece.|
-|descripcion|Detalle del gasto específico.|
-|monto|Valor del ítem.|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del ítem |
+| receipt_id | Comprobante al que pertenece |
+| description | Detalle del gasto específico |
+| amount | Valor del ítem |
 
 ## 🏗️ Gasto
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del gasto.|
-|id_evento|Evento asociado (si aplica).|
-|id_comprobante|Comprobante que respalda el gasto.|
-|id_directiva|Directivo que autoriza o registra.|
-|total|Monto total del gasto.|
-|tipo|Categoría del gasto (mantenimiento, actividad, etc.).|
-|fecha|Fecha del gasto.|
-|descripcion|Detalle del gasto realizado.|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del gasto |
+| event_id | Evento asociado (si aplica) |
+| receipt_id | Comprobante que respalda el gasto |
+| board_member_id | Directivo que autoriza o registra |
+| total | Monto total del gasto |
+| type | Categoría del gasto (mantenimiento, actividad, etc.) |
+| date | Fecha del gasto |
+| description | Detalle del gasto realizado |
 
 ## 🔄 Movimiento
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del movimiento.|
-|tipo|Tipo de movimiento (ingreso o egreso).|
-|monto|Valor del movimiento.|
-|fecha|Fecha del registro.|
-|descripcion|Detalle del movimiento.|
-|id_referencia|Identificador del registro relacionado.|
-|tipo_referencia|Tipo de referencia (aporte, multa o gasto).|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del movimiento |
+| type | Tipo de movimiento (ingreso o egreso) |
+| amount | Valor del movimiento |
+| date | Fecha del registro |
+| description | Detalle del movimiento |
+| reference_id | Identificador del registro relacionado |
+| reference_type | Tipo de referencia (aporte, multa o gasto) |
 
 ## 📢 Aviso
 
-|Propiedad|Descripción|
-|---|---|
-|id|Identificador único del aviso.|
-|tipo|Tipo de aviso (evento o multa).|
-|id_referencia|Registro al que hace referencia.|
-|titulo|Título del aviso.|
-|mensaje|Contenido o texto del aviso.|
-|fecha|Fecha de publicación del aviso.|
+| Propiedad | Descripción |
+|-----------|-------------|
+| id | Identificador único del aviso |
+| type | Tipo de aviso (evento o multa) |
+| reference_id | Registro al que hace referencia |
+| title | Título del aviso |
+| message | Contenido o texto del aviso |
+| date | Fecha de publicación del aviso |
 
 ---
