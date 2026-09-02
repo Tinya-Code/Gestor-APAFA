@@ -9,6 +9,7 @@
 **Actores:** N1–N5
 
 **Pseudocódigo:**
+
 ```javascript
 function listNotices(page, limit, type) {
   // Recibe: paginación y filtro opcional por tipo
@@ -21,13 +22,15 @@ function listNotices(page, limit, type) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
-| page | integer | No | Número de página |
-| limit | integer | No | Resultados por página |
-| type | string | No | Filtrar por tipo: event o fine |
+|-----------|-------|-----------|-------------|
+| page      | integer | No | Número de página |
+| limit     | integer | No | Resultados por página |
+| type      | string  | No | Filtrar por tipo: event o fine |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -68,6 +71,7 @@ function listNotices(page, limit, type) {
 **Actores:** N1–N5
 
 **Pseudocódigo:**
+
 ```javascript
 function getNotice(noticeId) {
   // Recibe: id del aviso
@@ -79,11 +83,13 @@ function getNotice(noticeId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del aviso |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -100,6 +106,7 @@ function getNotice(noticeId) {
 ```
 
 **Nota:** Los avisos son de solo lectura para los usuarios. Se crean automáticamente cuando:
+
 - M5 (Eventos) crea un evento con `generates_contribution: true`
 - M7 (Multas) genera multas vía `POST /fines/generate`
 

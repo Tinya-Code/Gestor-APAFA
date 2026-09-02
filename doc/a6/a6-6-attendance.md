@@ -9,6 +9,7 @@
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function listAttendance(eventId, page, limit) {
   // Recibe: id del evento y paginación
@@ -21,17 +22,20 @@ function listAttendance(eventId, page, limit) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del evento |
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|-----------|-------------|
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -62,6 +66,7 @@ function listAttendance(eventId, page, limit) {
 **Actores:** N1, N2, N4
 
 **Pseudocódigo:**
+
 ```javascript
 function createAttendance(eventId, data) {
   // Recibe: id del evento, id del padre y si asistió
@@ -77,11 +82,13 @@ function createAttendance(eventId, data) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del evento |
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "parent_id": 5,
@@ -95,6 +102,7 @@ function createAttendance(eventId, data) {
 | attended | boolean | ✅ | Si el padre asistió |
 
 **Respuesta (201):**
+
 ```json
 {
   "data": {
@@ -108,6 +116,7 @@ function createAttendance(eventId, data) {
 ```
 
 **Errores:**
+
 | Código | Descripción |
 |--------|-------------|
 | 422 | Ya existe un registro de asistencia para este padre/evento |
@@ -121,6 +130,7 @@ function createAttendance(eventId, data) {
 **Actores:** N1, N2, N4
 
 **Pseudocódigo:**
+
 ```javascript
 function updateAttendance(eventId, attendanceId, data) {
   // Recibe: ids de evento y asistencia, campos a actualizar
@@ -134,12 +144,14 @@ function updateAttendance(eventId, attendanceId, data) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del evento |
 | attendanceId | integer | ID de la asistencia |
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "attended": false

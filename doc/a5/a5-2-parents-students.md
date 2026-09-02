@@ -7,7 +7,7 @@
 ## Backend — Endpoints REST
 
 | # | Método | Endpoint | Descripción | Actores | Caso de Uso |
-|---|--------|----------|-------------|---------|-------------|
+| --- | -------- | ---------- | ------------- | --------- | ------------- |
 | 1 | GET | `/api/v1/parents` | Lista padres (paginado, filtros) | N1–N4 | Listar padres |
 | 2 | GET | `/api/v1/parents/:id` | Detalle de un padre | N1–N4 | Ver detalle de padre |
 | 3 | POST | `/api/v1/parents` | Registra un padre | N1, N2 | Registrar padre |
@@ -27,7 +27,7 @@
 ### Pantallas
 
 | # | Pantalla | Actores | Consume |
-|---|----------|---------|---------|
+| --- | ---------- | --------- | --------- |
 | 1 | Lista de padres | N1–N4 | `GET /parents` |
 | 2 | Detalle de padre | N1–N4 | `GET /parents/:id` |
 | 3 | Formulario padre (crear/editar) | N1, N2 | `POST/PUT /parents` |
@@ -38,7 +38,7 @@
 ### Desglose de Componentes
 
 | Componente | Tipo | Consume | Descripción |
-|------------|------|---------|-------------|
+| ------------ | ------ | --------- | ------------- |
 | Tabla de Padres | Tabla | `GET /parents` | Lista paginada con filtros (nombre, DNI) |
 | Tarjeta Detalle Padre | Tarjeta | `GET /parents/:id` | Muestra info del padre y estudiantes vinculados |
 | Formulario Padre | Formulario | `POST/PUT /parents` | Crear/editar padre: nombre, apellido, DNI, teléfono, email |
@@ -52,7 +52,7 @@
 ## Casos de Uso (de A4)
 
 | Caso de Uso | N1 | N2 | N3 | N4 | N5 | N6 |
-|-------------|:--:|:--:|:--:|:--:|:--:|:--:|
+| ------------- | :--: | :--: | :--: | :--: | :--: | :--: |
 | Listar padres | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Ver detalle de padre | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Registrar padre | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |

@@ -9,6 +9,7 @@
 **Actores:** N1–N5
 
 **Pseudocódigo:**
+
 ```javascript
 function login(email, password) {
   // Recibe: email y contraseña del usuario
@@ -25,6 +26,7 @@ function login(email, password) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "email": "usuario@ejemplo.com",
@@ -38,6 +40,7 @@ function login(email, password) {
 | password | string | ✅ | Contraseña del usuario |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -54,6 +57,7 @@ function login(email, password) {
 ```
 
 **Errores:**
+
 | Código | Descripción |
 |--------|-------------|
 | 401 | Credenciales inválidas |
@@ -68,6 +72,7 @@ function login(email, password) {
 **Actores:** N1–N5
 
 **Pseudocódigo:**
+
 ```javascript
 function logout(token) {
   // Recibe: el token JWT de la sesión activa
@@ -80,6 +85,7 @@ function logout(token) {
 ```
 
 **Encabezados:**
+
 ```
 Authorization: Bearer <token>
 ```
@@ -87,6 +93,7 @@ Authorization: Bearer <token>
 **Cuerpo de la solicitud:** Ninguno
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -96,6 +103,7 @@ Authorization: Bearer <token>
 ```
 
 **Errores:**
+
 | Código | Descripción |
 |--------|-------------|
 | 401 | Token inválido o expirado |
@@ -109,6 +117,7 @@ Authorization: Bearer <token>
 **Actores:** N1–N5
 
 **Pseudocódigo:**
+
 ```javascript
 function getMe(token) {
   // Recibe: el token JWT de la sesión activa
@@ -124,6 +133,7 @@ function getMe(token) {
 ```
 
 **Encabezados:**
+
 ```
 Authorization: Bearer <token>
 ```
@@ -131,6 +141,7 @@ Authorization: Bearer <token>
 **Cuerpo de la solicitud:** Ninguno
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -148,6 +159,7 @@ Authorization: Bearer <token>
 ```
 
 **Errores:**
+
 | Código | Descripción |
 |--------|-------------|
 | 401 | Token inválido o expirado |
@@ -161,6 +173,7 @@ Authorization: Bearer <token>
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function getRoles() {
   // Recibe: nada (solo requiere autenticación de administrador)
@@ -174,6 +187,7 @@ function getRoles() {
 ```
 
 **Encabezados:**
+
 ```
 Authorization: Bearer <token>
 ```
@@ -181,6 +195,7 @@ Authorization: Bearer <token>
 **Cuerpo de la solicitud:** Ninguno
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -214,6 +229,7 @@ Authorization: Bearer <token>
 ```
 
 **Errores:**
+
 | Código | Descripción |
 |--------|-------------|
 | 403 | Permisos insuficientes |
@@ -227,6 +243,7 @@ Authorization: Bearer <token>
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function updateRole(roleId, userId, newRole) {
   // Recibe: id del rol, id del usuario y nuevo rol a asignar
@@ -243,11 +260,13 @@ function updateRole(roleId, userId, newRole) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del rol |
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "user_id": 5,
@@ -261,6 +280,7 @@ function updateRole(roleId, userId, newRole) {
 | role | string | ✅ | Nombre del rol (admin, president, treasurer, secretary, parent) |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -273,8 +293,9 @@ function updateRole(roleId, userId, newRole) {
 ```
 
 **Errores:**
+
 | Código | Descripción |
-|--------|-------------|
+| -------- | ------------- |
 | 403 | Permisos insuficientes |
 | 404 | Rol o usuario no encontrado |
 | 422 | Error de validación |

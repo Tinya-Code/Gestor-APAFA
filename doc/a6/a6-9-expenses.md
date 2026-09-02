@@ -9,6 +9,7 @@
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function listExpenses(page, limit, type, dateFrom, dateTo) {
   // Recibe: paginación y filtros opcionales (tipo, fecha)
@@ -22,8 +23,9 @@ function listExpenses(page, limit, type, dateFrom, dateTo) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
+| ----------- | ------ | ----------- | ------------- |
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 | type | string | No | Filtrar por tipo (mantenimiento, actividad, etc.) |
@@ -31,6 +33,7 @@ function listExpenses(page, limit, type, dateFrom, dateTo) {
 | date_to | string | No | Filtrar hasta fecha |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -65,6 +68,7 @@ function listExpenses(page, limit, type, dateFrom, dateTo) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function getExpense(expenseId) {
   // Recibe: id del gasto
@@ -78,11 +82,13 @@ function getExpense(expenseId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del gasto |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -126,6 +132,7 @@ function getExpense(expenseId) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function createExpense(data) {
   // Recibe: id del evento (opcional), id del comprobante, total,
@@ -142,6 +149,7 @@ function createExpense(data) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "event_id": 1,
@@ -154,7 +162,7 @@ function createExpense(data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | event_id | integer | No | Evento asociado (nullable) |
 | receipt_id | integer | ✅ | ID del comprobante |
 | total | number | ✅ | Monto total |
@@ -175,6 +183,7 @@ function createExpense(data) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function updateExpense(expenseId, data) {
   // Recibe: id del gasto y campos a actualizar
@@ -200,6 +209,7 @@ function updateExpense(expenseId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteExpense(expenseId) {
   // Recibe: id del gasto
@@ -215,6 +225,7 @@ function deleteExpense(expenseId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -232,6 +243,7 @@ function deleteExpense(expenseId) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function createReceipt(data) {
   // Recibe: id del directivo, número, tipo, fecha y descripción
@@ -246,6 +258,7 @@ function createReceipt(data) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "board_member_id": 2,
@@ -257,7 +270,7 @@ function createReceipt(data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | board_member_id | integer | ✅ | Directivo responsable |
 | number | string | ✅ | Número del comprobante (único) |
 | type | string | ✅ | Tipo de comprobante (invoice, ticket, etc.) |
@@ -275,6 +288,7 @@ function createReceipt(data) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function updateReceipt(receiptId, data) {
   // Recibe: id del comprobante y campos a actualizar
@@ -300,6 +314,7 @@ function updateReceipt(receiptId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteReceipt(receiptId) {
   // Recibe: id del comprobante
@@ -314,6 +329,7 @@ function deleteReceipt(receiptId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -331,6 +347,7 @@ function deleteReceipt(receiptId) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function createExpenseItem(receiptId, data) {
   // Recibe: id del comprobante, descripción y monto
@@ -345,11 +362,13 @@ function createExpenseItem(receiptId, data) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del comprobante |
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "description": "Globos (100 unidades)",
@@ -373,6 +392,7 @@ function createExpenseItem(receiptId, data) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function updateExpenseItem(receiptId, itemId, data) {
   // Recibe: ids de comprobante e item, campos a actualizar
@@ -386,6 +406,7 @@ function updateExpenseItem(receiptId, itemId, data) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del comprobante |
@@ -404,6 +425,7 @@ function updateExpenseItem(receiptId, itemId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteExpenseItem(receiptId, itemId) {
   // Recibe: ids de comprobante e item
@@ -418,6 +440,7 @@ function deleteExpenseItem(receiptId, itemId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {

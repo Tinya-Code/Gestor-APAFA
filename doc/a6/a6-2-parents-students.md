@@ -9,6 +9,7 @@
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function listParents(page, limit, search) {
   // Recibe: número de página, límite de resultados y término de búsqueda
@@ -22,13 +23,15 @@ function listParents(page, limit, search) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
+| ----------- | ------ | ----------- | ------------- |
 | page | integer | No | Número de página (default: 1) |
 | limit | integer | No | Resultados por página (default: 20) |
 | search | string | No | Buscar por nombre, apellido o DNI |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -60,6 +63,7 @@ function listParents(page, limit, search) {
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function getParent(parentId) {
   // Recibe: id del padre
@@ -72,11 +76,13 @@ function getParent(parentId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del padre |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -100,6 +106,7 @@ function getParent(parentId) {
 ```
 
 **Errores:**
+
 | Código | Descripción |
 |--------|-------------|
 | 404 | Padre no encontrado |
@@ -113,6 +120,7 @@ function getParent(parentId) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function createParent(data) {
   // Recibe: nombre, apellido, DNI, teléfono y email del padre
@@ -127,6 +135,7 @@ function createParent(data) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "name": "María",
@@ -138,7 +147,7 @@ function createParent(data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | name | string | ✅ | Nombre del padre |
 | surname | string | ✅ | Apellido del padre |
 | dni | string | ✅ | Documento nacional de identidad (único) |
@@ -146,6 +155,7 @@ function createParent(data) {
 | email | string | No | Dirección de email |
 
 **Respuesta (201):**
+
 ```json
 {
   "data": {
@@ -161,6 +171,7 @@ function createParent(data) {
 ```
 
 **Errores:**
+
 | Código | Descripción |
 |--------|-------------|
 | 403 | Permisos insuficientes |
@@ -175,6 +186,7 @@ function createParent(data) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function updateParent(parentId, data) {
   // Recibe: id del padre y campos a actualizar
@@ -189,6 +201,7 @@ function updateParent(parentId, data) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del padre |
@@ -198,8 +211,9 @@ function updateParent(parentId, data) {
 **Respuesta (200):** Mismo formato que POST.
 
 **Errores:**
+
 | Código | Descripción |
-|--------|-------------|
+| -------- | ------------- |
 | 403 | Permisos insuficientes |
 | 404 | Padre no encontrado |
 | 422 | Error de validación |
@@ -213,6 +227,7 @@ function updateParent(parentId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteParent(parentId) {
   // Recibe: id del padre
@@ -229,6 +244,7 @@ function deleteParent(parentId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -238,6 +254,7 @@ function deleteParent(parentId) {
 ```
 
 **Errores:**
+
 | Código | Descripción |
 |--------|-------------|
 | 403 | Permisos insuficientes |
@@ -252,6 +269,7 @@ function deleteParent(parentId) {
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function listStudents(page, limit, grade, section, parentId) {
   // Recibe: paginación y filtros opcionales (grado, sección, padre)
@@ -265,8 +283,9 @@ function listStudents(page, limit, grade, section, parentId) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
+| ----------- | ------ | ----------- | ------------- |
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 | grade | string | No | Filtrar por grado |
@@ -274,6 +293,7 @@ function listStudents(page, limit, grade, section, parentId) {
 | parent_id | integer | No | Filtrar por padre |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -305,6 +325,7 @@ function listStudents(page, limit, grade, section, parentId) {
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function getStudent(studentId) {
   // Recibe: id del estudiante
@@ -317,6 +338,7 @@ function getStudent(studentId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -344,6 +366,7 @@ function getStudent(studentId) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function createStudent(data) {
   // Recibe: nombre, apellido, grado, sección y id del padre
@@ -358,6 +381,7 @@ function createStudent(data) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "name": "Sofía",
@@ -369,7 +393,7 @@ function createStudent(data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | name | string | ✅ | Nombre del estudiante |
 | surname | string | ✅ | Apellido del estudiante |
 | grade | string | ✅ | Nivel escolar |
@@ -387,6 +411,7 @@ function createStudent(data) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function updateStudent(studentId, data) {
   // Recibe: id del estudiante y campos a actualizar
@@ -412,6 +437,7 @@ function updateStudent(studentId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteStudent(studentId) {
   // Recibe: id del estudiante
@@ -426,6 +452,7 @@ function deleteStudent(studentId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -443,6 +470,7 @@ function deleteStudent(studentId) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function assignStudentToParent(studentId, newParentId) {
   // Recibe: id del estudiante y id del nuevo padre
@@ -457,11 +485,13 @@ function assignStudentToParent(studentId, newParentId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del estudiante |
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "parent_id": 3
@@ -475,6 +505,7 @@ function assignStudentToParent(studentId, newParentId) {
 **Respuesta (200):** Objeto estudiante con nueva referencia al padre.
 
 **Errores:**
+
 | Código | Descripción |
 |--------|-------------|
 | 404 | Estudiante o padre no encontrado |

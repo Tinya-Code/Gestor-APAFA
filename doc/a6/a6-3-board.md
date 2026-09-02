@@ -9,6 +9,7 @@
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function listBoardMembers(page, limit) {
   // Recibe: paginación
@@ -21,12 +22,14 @@ function listBoardMembers(page, limit) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|-----------|-------------|
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -57,6 +60,7 @@ function listBoardMembers(page, limit) {
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function getBoardMember(memberId) {
   // Recibe: id del miembro
@@ -69,11 +73,13 @@ function getBoardMember(memberId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del miembro |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -101,6 +107,7 @@ function getBoardMember(memberId) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function createBoardMember(data) {
   // Recibe: id del padre, rol y fecha de inicio
@@ -116,6 +123,7 @@ function createBoardMember(data) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "parent_id": 5,
@@ -125,7 +133,7 @@ function createBoardMember(data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | parent_id | integer | ✅ | ID del padre que ocupa el cargo |
 | role | string | ✅ | Rol (admin, president, vice_president, treasurer, secretary) |
 | start_date | string | ✅ | Fecha de inicio (YYYY-MM-DD) |
@@ -142,6 +150,7 @@ function createBoardMember(data) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function updateBoardMember(memberId, data) {
   // Recibe: id del miembro y campos a actualizar
@@ -167,6 +176,7 @@ function updateBoardMember(memberId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteBoardMember(memberId) {
   // Recibe: id del miembro
@@ -181,6 +191,7 @@ function deleteBoardMember(memberId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {

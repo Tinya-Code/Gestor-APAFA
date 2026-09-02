@@ -9,6 +9,7 @@
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function listAssemblies(page, limit, dateFrom, dateTo) {
   // Recibe: paginación y filtros opcionales de fecha
@@ -22,14 +23,16 @@ function listAssemblies(page, limit, dateFrom, dateTo) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
+| ----------- | ------ | ----------- | ------------- |
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 | date_from | string | No | Filtrar desde fecha (YYYY-MM-DD) |
 | date_to | string | No | Filtrar hasta fecha (YYYY-MM-DD) |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -59,6 +62,7 @@ function listAssemblies(page, limit, dateFrom, dateTo) {
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function getAssembly(assemblyId) {
   // Recibe: id de la asamblea
@@ -71,11 +75,13 @@ function getAssembly(assemblyId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID de la asamblea |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -104,6 +110,7 @@ function getAssembly(assemblyId) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function createAssembly(data) {
   // Recibe: título, fecha y descripción
@@ -117,6 +124,7 @@ function createAssembly(data) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "title": "Asamblea Anual 2026",
@@ -126,7 +134,7 @@ function createAssembly(data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | title | string | ✅ | Título de la asamblea |
 | date | string | ✅ | Fecha (YYYY-MM-DD) |
 | description | string | No | Descripción |
@@ -142,6 +150,7 @@ function createAssembly(data) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function updateAssembly(assemblyId, data) {
   // Recibe: id de la asamblea y campos a actualizar
@@ -167,6 +176,7 @@ function updateAssembly(assemblyId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteAssembly(assemblyId) {
   // Recibe: id de la asamblea
@@ -181,6 +191,7 @@ function deleteAssembly(assemblyId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -198,6 +209,7 @@ function deleteAssembly(assemblyId) {
 **Actores:** N1, N2, N4
 
 **Pseudocódigo:**
+
 ```javascript
 function createAssemblyDetail(assemblyId, data) {
   // Recibe: id de la asamblea, descripción y opcionalmente URL de imagen
@@ -213,11 +225,13 @@ function createAssemblyDetail(assemblyId, data) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID de la asamblea |
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "description": "Presupuesto anual aprobado: $50.000",
@@ -241,6 +255,7 @@ function createAssemblyDetail(assemblyId, data) {
 **Actores:** N1, N2, N4
 
 **Pseudocódigo:**
+
 ```javascript
 function updateAssemblyDetail(assemblyId, detailId, data) {
   // Recibe: ids de asamblea y detalle, campos a actualizar
@@ -254,6 +269,7 @@ function updateAssemblyDetail(assemblyId, detailId, data) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID de la asamblea |
@@ -272,6 +288,7 @@ function updateAssemblyDetail(assemblyId, detailId, data) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteAssemblyDetail(assemblyId, detailId) {
   // Recibe: ids de asamblea y detalle
@@ -285,6 +302,7 @@ function deleteAssemblyDetail(assemblyId, detailId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {

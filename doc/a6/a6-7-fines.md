@@ -9,6 +9,7 @@
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function listFines(page, limit, parentId, eventId, paid) {
   // Recibe: paginación y filtros opcionales (padre, evento, estado de pago)
@@ -22,8 +23,9 @@ function listFines(page, limit, parentId, eventId, paid) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
+| ----------- | ------ | ----------- | ------------- |
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 | parent_id | integer | No | Filtrar por padre |
@@ -31,6 +33,7 @@ function listFines(page, limit, parentId, eventId, paid) {
 | paid | boolean | No | Filtrar por estado de pago |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -64,6 +67,7 @@ function listFines(page, limit, parentId, eventId, paid) {
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function getFine(fineId) {
   // Recibe: id de la multa
@@ -76,11 +80,13 @@ function getFine(fineId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID de la multa |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -113,6 +119,7 @@ function getFine(fineId) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function createFine(data) {
   // Recibe: id del padre, id del evento y monto
@@ -128,6 +135,7 @@ function createFine(data) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "parent_id": 5,
@@ -137,7 +145,7 @@ function createFine(data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | parent_id | integer | ✅ | ID del padre |
 | event_id | integer | ✅ | ID del evento |
 | amount | number | ✅ | Monto de la multa |
@@ -153,6 +161,7 @@ function createFine(data) {
 **Actores:** N1, N6
 
 **Pseudocódigo:**
+
 ```javascript
 function generateFines(eventId) {
   // Recibe: id del evento
@@ -171,6 +180,7 @@ function generateFines(eventId) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "event_id": 1
@@ -182,6 +192,7 @@ function generateFines(eventId) {
 | event_id | integer | ✅ | ID del evento para generar multas |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -203,6 +214,7 @@ function generateFines(eventId) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function updateFine(fineId, data) {
   // Recibe: id de la multa y campos a actualizar
@@ -217,11 +229,13 @@ function updateFine(fineId, data) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID de la multa |
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "amount": 6000,
@@ -231,7 +245,7 @@ function updateFine(fineId, data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | amount | number | No | Monto actualizado |
 | paid | boolean | No | Estado de pago |
 | payment_date | string | No | Fecha de pago (YYYY-MM-DD) |
@@ -247,6 +261,7 @@ function updateFine(fineId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteFine(fineId) {
   // Recibe: id de la multa
@@ -261,6 +276,7 @@ function deleteFine(fineId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -278,6 +294,7 @@ function deleteFine(fineId) {
 **Actores:** N1–N4
 
 **Pseudocódigo:**
+
 ```javascript
 function getParentFines(parentId) {
   // Recibe: id del padre
@@ -290,11 +307,13 @@ function getParentFines(parentId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del padre |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {

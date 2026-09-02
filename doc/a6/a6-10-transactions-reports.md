@@ -9,6 +9,7 @@
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function listTransactions(page, limit, type, dateFrom, dateTo) {
   // Recibe: paginación y filtros opcionales (tipo, fecha)
@@ -21,8 +22,9 @@ function listTransactions(page, limit, type, dateFrom, dateTo) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
+| ----------- | ------ | ----------- | ------------- |
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 | type | string | No | Filtrar por tipo: income o expense |
@@ -30,6 +32,7 @@ function listTransactions(page, limit, type, dateFrom, dateTo) {
 | date_to | string | No | Filtrar hasta fecha |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -70,6 +73,7 @@ function listTransactions(page, limit, type, dateFrom, dateTo) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function getTransaction(transactionId) {
   // Recibe: id del movimiento
@@ -81,11 +85,13 @@ function getTransaction(transactionId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del movimiento |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -110,6 +116,7 @@ function getTransaction(transactionId) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function getBalance() {
   // Recibe: nada
@@ -123,6 +130,7 @@ function getBalance() {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -145,6 +153,7 @@ function getBalance() {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function generateFinancialReport(dateFrom, dateTo, type) {
   // Recibe: rango de fechas y tipo opcional
@@ -160,13 +169,15 @@ function generateFinancialReport(dateFrom, dateTo, type) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
+| ----------- | ------ | ----------- | ------------- |
 | date_from | string | ✅ | Fecha de inicio (YYYY-MM-DD) |
 | date_to | string | ✅ | Fecha de fin (YYYY-MM-DD) |
 | type | string | No | Filtrar: income, expense o all (default) |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -214,6 +225,7 @@ function generateFinancialReport(dateFrom, dateTo, type) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function exportReportPdf(dateFrom, dateTo, type) {
   // Recibe: mismo parámetros que generateFinancialReport
@@ -238,6 +250,7 @@ function exportReportPdf(dateFrom, dateTo, type) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function exportReportCsv(dateFrom, dateTo, type) {
   // Recibe: mismos parámetros que generateFinancialReport
@@ -254,6 +267,7 @@ function exportReportCsv(dateFrom, dateTo, type) {
 **Respuesta:** Archivo CSV con `Content-Type: text/csv`.
 
 **Columnas CSV:**
+
 ```
 Fecha,Tipo,Categoría,Monto,Descripción,Referencia
 2026-04-10,income,contribution,2000,Aporte al festival,Padre #5

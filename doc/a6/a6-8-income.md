@@ -9,6 +9,7 @@
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function listIncome(page, limit, type, dateFrom, dateTo, parentId) {
   // Recibe: paginación y filtros opcionales (tipo, fecha, padre)
@@ -22,8 +23,9 @@ function listIncome(page, limit, type, dateFrom, dateTo, parentId) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
+| ----------- | ------ | ----------- | ------------- |
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 | type | string | No | Filtrar por tipo (donation, fine, contribution, fee) |
@@ -32,6 +34,7 @@ function listIncome(page, limit, type, dateFrom, dateTo, parentId) {
 | parent_id | integer | No | Filtrar por padre |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -66,6 +69,7 @@ function listIncome(page, limit, type, dateFrom, dateTo, parentId) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function getIncome(incomeId) {
   // Recibe: id del ingreso
@@ -78,11 +82,13 @@ function getIncome(incomeId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del ingreso |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -117,6 +123,7 @@ function getIncome(incomeId) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function createIncome(data) {
   // Recibe: id del padre, id del evento (opcional), monto,
@@ -134,6 +141,7 @@ function createIncome(data) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "parent_id": 5,
@@ -146,7 +154,7 @@ function createIncome(data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | parent_id | integer | ✅ | Padre que realizó el pago |
 | event_id | integer | No | Evento asociado (nullable) |
 | amount | number | ✅ | Monto |
@@ -167,6 +175,7 @@ function createIncome(data) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function updateIncome(incomeId, data) {
   // Recibe: id del ingreso y campos a actualizar
@@ -192,6 +201,7 @@ function updateIncome(incomeId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteIncome(incomeId) {
   // Recibe: id del ingreso
@@ -207,6 +217,7 @@ function deleteIncome(incomeId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -224,6 +235,7 @@ function deleteIncome(incomeId) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function getParentIncome(parentId, page, limit) {
   // Recibe: id del padre y paginación
@@ -236,17 +248,20 @@ function getParentIncome(parentId, page, limit) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del padre |
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|-----------|-------------|
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -277,6 +292,7 @@ function getParentIncome(parentId, page, limit) {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function getIncomeTotals() {
   // Recibe: nada
@@ -290,6 +306,7 @@ function getIncomeTotals() {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -321,6 +338,7 @@ function getIncomeTotals() {
 **Actores:** N1, N2, N3
 
 **Pseudocódigo:**
+
 ```javascript
 function getFinancialStatus(parentId) {
   // Recibe: id del padre
@@ -334,11 +352,13 @@ function getFinancialStatus(parentId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del padre |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {

@@ -9,6 +9,7 @@
 **Actores:** N1–N5
 
 **Pseudocódigo:**
+
 ```javascript
 function listEvents(page, limit, dateFrom, dateTo) {
   // Recibe: paginación y filtros opcionales de fecha
@@ -21,14 +22,16 @@ function listEvents(page, limit, dateFrom, dateTo) {
 ```
 
 **Parámetros de consulta:**
+
 | Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
+| ----------- | ------ | ----------- | ------------- |
 | page | integer | No | Número de página |
 | limit | integer | No | Resultados por página |
 | date_from | string | No | Filtrar desde fecha |
 | date_to | string | No | Filtrar hasta fecha |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": [
@@ -63,6 +66,7 @@ function listEvents(page, limit, dateFrom, dateTo) {
 **Actores:** N1–N5
 
 **Pseudocódigo:**
+
 ```javascript
 function getEvent(eventId) {
   // Recibe: id del evento
@@ -74,11 +78,13 @@ function getEvent(eventId) {
 ```
 
 **Parámetros de ruta:**
+
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | id | integer | ID del evento |
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {
@@ -107,6 +113,7 @@ function getEvent(eventId) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function createEvent(data) {
   // Recibe: título, fecha, descripción y flags de configuración
@@ -122,6 +129,7 @@ function createEvent(data) {
 ```
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "assembly_id": null,
@@ -138,7 +146,7 @@ function createEvent(data) {
 ```
 
 | Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
+| ------- | ------ | ----------- | ------------- |
 | assembly_id | integer | No | Asamblea vinculada (nullable) |
 | title | string | ✅ | Título del evento |
 | date | string | ✅ | Fecha (YYYY-MM-DD) |
@@ -161,6 +169,7 @@ function createEvent(data) {
 **Actores:** N1, N2
 
 **Pseudocódigo:**
+
 ```javascript
 function updateEvent(eventId, data) {
   // Recibe: id del evento y campos a actualizar
@@ -186,6 +195,7 @@ function updateEvent(eventId, data) {
 **Actores:** N1
 
 **Pseudocódigo:**
+
 ```javascript
 function deleteEvent(eventId) {
   // Recibe: id del evento
@@ -201,6 +211,7 @@ function deleteEvent(eventId) {
 ```
 
 **Respuesta (200):**
+
 ```json
 {
   "data": {

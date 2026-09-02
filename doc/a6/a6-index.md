@@ -9,7 +9,7 @@ URL base: `http://localhost:3000/api/v1`
 ## Módulos
 
 | # | Módulo | Archivo | Endpoints |
-|---|--------|---------|-----------|
+| --- | -------- | --------- | ----------- |
 | M1 | Autenticación y Roles | [a6-1-authentication.md](./a6-1-authentication.md) | 5 |
 | M2 | Padres y Estudiantes | [a6-2-parents-students.md](./a6-2-parents-students.md) | 11 |
 | M3 | Directiva | [a6-3-board.md](./a6-3-board.md) | 5 |
@@ -29,6 +29,7 @@ URL base: `http://localhost:3000/api/v1`
 ## Formatos de Respuesta Comunes
 
 ### Éxito (200)
+
 ```json
 {
   "data": { ... }
@@ -36,6 +37,7 @@ URL base: `http://localhost:3000/api/v1`
 ```
 
 ### Éxito con lista (200)
+
 ```json
 {
   "data": [ ... ],
@@ -49,6 +51,7 @@ URL base: `http://localhost:3000/api/v1`
 ```
 
 ### Error (4xx/5xx)
+
 ```json
 {
   "error": {
@@ -59,6 +62,7 @@ URL base: `http://localhost:3000/api/v1`
 ```
 
 ### No encontrado (404)
+
 ```json
 {
   "error": {
@@ -69,6 +73,7 @@ URL base: `http://localhost:3000/api/v1`
 ```
 
 ### Prohibido (403)
+
 ```json
 {
   "error": {
