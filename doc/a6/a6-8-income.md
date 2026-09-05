@@ -1,380 +1,122 @@
 # A6 M8 — Ingresos
 
----
+**#1 — GET /income** — Listar ingresos — Retorna: Datos
 
-## GET `/api/v1/income`
-
-**Descripción:** Lista registros de ingreso con filtros.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function listIncome(page, limit, type, dateFrom, dateTo, parentId) {
-  // Recibe: paginación y filtros opcionales (tipo, fecha, padre)
-
-  // Consulta: ingresos en la base de datos
-  // Aplica filtros si se proporcionan
-  // Incluye: nombre del padre y título del evento
-
-  // Devuelve: lista de ingresos paginada
+```
+listarIngresos {
+  parsearPaginacion();       // page=1, limit=20 por defecto
+  parsearFiltros();          // type (donation, fine, contribution, fee), dateFrom, dateTo, parentId opcionales
+  construirConsulta();       // SELECT i.*, CONCAT(p.name, ' ', p.surname) as parent_name, e.title as event_title
+                             // FROM ingreso i
+                             // JOIN padre p ON p.id = i.parent_id
+                             // LEFT JOIN evento e ON e.id = i.event_id
+                             // WHERE i.deleted_at IS NULL
+                             // Si type: AND i.type = ?
+                             // Si dateFrom: AND i.date >= ?
+                             // Si dateTo: AND i.date <= ?
+                             // Si parentId: AND i.parent_id = ?
+                             // ORDER BY i.date DESC
+  ejecutarPaginado();        // ejecuta con LIMIT/OFFSET, cuenta total
+  retornarDatos();           // retorna { data: [...], pagination: { page, limit, total, total_pages } }
 }
 ```
 
-**Parámetros de consulta:**
+**#2 — GET /income/:id** — Obtener ingreso por id — Retorna: Datos
 
-| Parámetro | Tipo | Requerido | Descripción |
-| ----------- | ------ | ----------- | ------------- |
-| page | integer | No | Número de página |
-| limit | integer | No | Resultados por página |
-| type | string | No | Filtrar por tipo (donation, fine, contribution, fee) |
-| date_from | string | No | Filtrar desde fecha |
-| date_to | string | No | Filtrar hasta fecha |
-| parent_id | integer | No | Filtrar por padre |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "parent_id": 5,
-      "parent_name": "Carlos López",
-      "event_id": 1,
-      "event_title": "Festival Escolar",
-      "board_member_id": 2,
-      "amount": 2000,
-      "date": "2026-04-10",
-      "description": "Aporte al festival",
-      "type": "contribution"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 50,
-    "total_pages": 3
-  }
+```
+detalleIngreso {
+  RD.ingresoExiste();        // el ingreso existe en la base de datos
+  buscarIngreso();           // SELECT * FROM ingreso WHERE id = ? AND deleted_at IS NULL
+  buscarPadre();             // datos del padre que realiza el aporte
+  buscarEvento();            // datos del evento asociado (puede ser null)
+  buscarDirectivo();         // datos del directivo que registra
+  retornarDatos();           // retorna { id, parent: {...}, event: {...}, board_member_name, amount, date, description, type }
 }
 ```
 
----
+**#3 — POST /income** — Registrar ingreso — Retorna: Datos
 
-## GET `/api/v1/income/:id`
-
-**Descripción:** Retorna el detalle de un ingreso.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function getIncome(incomeId) {
-  // Recibe: id del ingreso
-
-  // Consulta: datos del ingreso
-  // Consulta: información del padre, evento y directivo
-
-  // Devuelve: el ingreso completo con todas las referencias
+```
+nuevoIngreso {
+  RD.nuevoIngreso();         // parent_id, amount, date, type son obligatorios
+  RD.tipoValido();           // type debe ser: donation, fine, contribution, fee
+  RD.montoPositivo();        // amount > 0
+  RD.padreExiste();          // el padre debe existir
+  insertarIngreso();         // INSERT INTO ingreso (parent_id, event_id, board_member_id, amount, date, description, type, created_at, updated_at)
+                             // VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+  crearMovimiento();         // INSERT INTO movimiento (type, amount, date, description, reference_id, reference_type, created_at, updated_at)
+                             // VALUES ('ingreso', ?, ?, ?, ?, 'ingreso', NOW(), NOW())
+  retornarDatos();           // retorna ingreso con id y created_at
 }
 ```
 
-**Parámetros de ruta:**
+**#4 — PUT /income/:id** — Editar ingreso — Retorna: Datos
 
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID del ingreso |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "id": 1,
-    "parent_id": 5,
-    "parent": {
-      "id": 5,
-      "name": "Carlos",
-      "surname": "López"
-    },
-    "event_id": 1,
-    "event": {
-      "id": 1,
-      "title": "Festival Escolar"
-    },
-    "board_member_id": 2,
-    "board_member_name": "Ana Martínez",
-    "amount": 2000,
-    "date": "2026-04-10",
-    "description": "Aporte al festival",
-    "type": "contribution"
-  }
+```
+actualizarIngreso {
+  RD.ingresoExiste();        // el ingreso existe en la base de datos
+  validarCambios();          // solo actualiza campos presentes (patch parcial)
+  actualizarCampos();        // UPDATE ingreso SET amount=COALESCE(?,amount), date=COALESCE(?,date),
+                             //   description=COALESCE(?,description), type=COALESCE(?,type), updated_at=NOW()
+                             //   WHERE id = ?
+  retornarDatos();           // retorna ingreso actualizado
 }
 ```
 
----
+**#5 — DELETE /income/:id** — Eliminar ingreso — Retorna: Mensaje
 
-## POST `/api/v1/income`
-
-**Descripción:** Registra un nuevo ingreso.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function createIncome(data) {
-  // Recibe: id del padre, id del evento (opcional), monto,
-  // fecha, descripción y tipo
-
-  // Valida: que el padre exista
-  // Valida: que los campos obligatorios estén presentes
-  // Valida: que el tipo sea válido (donation, fine, contribution, fee)
-
-  // Procesa: crea el registro de ingreso
-  // Crea automáticamente un registro en la tabla de movimientos (tipo: ingreso)
-
-  // Devuelve: el ingreso creado
+```
+eliminarIngreso {
+  RD.adminOnly();            // solo administradores (N1)
+  RD.ingresoExiste();        // el ingreso existe en la base de datos
+  borrarLogicoCascada();     // UPDATE ingreso SET deleted_at = NOW() WHERE id = ?
+                             // UPDATE movimiento SET deleted_at = NOW() WHERE reference_id = ? AND reference_type = 'ingreso'
+  retornarMensaje();         // retorna "Ingreso eliminado exitosamente"
 }
 ```
 
-**Cuerpo de la solicitud:**
+**#6 — GET /parents/:id/income** — Historial de ingresos de un padre — Retorna: Datos
 
-```json
-{
-  "parent_id": 5,
-  "event_id": 1,
-  "amount": 2000,
-  "date": "2026-04-10",
-  "description": "Aporte al festival",
-  "type": "contribution"
+```
+historialIngresos {
+  RD.padreExiste();          // el padre debe existir
+  parsearPaginacion();       // page=1, limit=20 por defecto
+  construirConsulta();       // SELECT i.*, e.title as event_title FROM ingreso i
+                             // LEFT JOIN evento e ON e.id = i.event_id
+                             // WHERE i.parent_id = ? AND i.deleted_at IS NULL
+                             // ORDER BY i.date DESC
+  ejecutarPaginado();        // ejecuta con LIMIT/OFFSET, cuenta total
+  retornarDatos();           // retorna { data: [...], pagination: { page, limit, total, total_pages } }
 }
 ```
 
-| Campo | Tipo | Requerido | Descripción |
-| ------- | ------ | ----------- | ------------- |
-| parent_id | integer | ✅ | Padre que realizó el pago |
-| event_id | integer | No | Evento asociado (nullable) |
-| amount | number | ✅ | Monto |
-| date | string | ✅ | Fecha (YYYY-MM-DD) |
-| description | string | No | Descripción |
-| type | string | ✅ | Tipo: donation, fine, contribution, fee |
+**#7 — GET /income/totals-panel** — Panel de totales — Retorna: Datos
 
-**Respuesta (201):** Objeto ingreso con `id` y `created_at`.
-
-**Efecto secundario:** Crea un registro correspondiente en la tabla Transaction (type: income).
-
----
-
-## PUT `/api/v1/income/:id`
-
-**Descripción:** Edita un ingreso.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function updateIncome(incomeId, data) {
-  // Recibe: id del ingreso y campos a actualizar
-
-  // Valida: que el ingreso exista
-
-  // Procesa: actualiza los campos proporcionados
-
-  // Devuelve: el ingreso actualizado
+```
+panelTotales {
+  calcularRecaudado();       // SELECT SUM(amount) FROM ingreso WHERE deleted_at IS NULL
+  calcularPendiente();       // SELECT SUM(m.amount) FROM multa m WHERE m.paid = 0 AND m.deleted_at IS NULL
+  calcularPorTipo();         // SELECT type, SUM(amount) FROM ingreso WHERE deleted_at IS NULL GROUP BY type
+  calcularPorMes();          // SELECT DATE_FORMAT(date, '%Y-%m') as month, SUM(amount) as collected
+                             // FROM ingreso WHERE deleted_at IS NULL GROUP BY month ORDER BY month DESC
+  retornarDatos();           // retorna { total_collected, total_pending, by_type: {...}, by_month: [...] }
 }
 ```
 
-**Cuerpo de la solicitud:** Igual que POST (todos los campos opcionales).
+**#8 — GET /parents/:id/financial-status** — Estado financiero por padre — Retorna: Datos
 
-**Respuesta (200):** Objeto ingreso actualizado.
-
----
-
-## DELETE `/api/v1/income/:id`
-
-**Descripción:** Elimina un ingreso.
-
-**Actores:** N1
-
-**Pseudocódigo:**
-
-```javascript
-function deleteIncome(incomeId) {
-  // Recibe: id del ingreso
-
-  // Valida: que el usuario sea administrador (N1)
-  // Valida: que el ingreso exista
-
-  // Procesa: elimina el registro de ingreso
-  // Elimina o anula el movimiento asociado
-
-  // Devuelve: confirmación de eliminación
-}
 ```
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "message": "Ingreso eliminado exitosamente"
-  }
-}
-```
-
----
-
-## GET `/api/v1/parents/:id/income`
-
-**Descripción:** Retorna el historial de ingresos de un padre específico.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function getParentIncome(parentId, page, limit) {
-  // Recibe: id del padre y paginación
-
-  // Consulta: todos los ingresos del padre
-  // Ordena: por fecha descendente
-
-  // Devuelve: lista paginada de ingresos del padre
-}
-```
-
-**Parámetros de ruta:**
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID del padre |
-
-**Parámetros de consulta:**
-
-| Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
-| page | integer | No | Número de página |
-| limit | integer | No | Resultados por página |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "event_title": "Festival Escolar",
-      "amount": 2000,
-      "date": "2026-04-10",
-      "type": "contribution",
-      "description": "Aporte al festival"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 8,
-    "total_pages": 1
-  }
-}
-```
-
----
-
-## GET `/api/v1/income/totals-panel`
-
-**Descripción:** Retorna totales: recaudado vs pendiente.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function getIncomeTotals() {
-  // Recibe: nada
-
-  // Consulta: todos los ingresos registrados
-  // Calcula: total recaudado, total pendiente
-  // Agrupa: por tipo de ingreso y por mes
-
-  // Devuelve: resumen de totales con desglose por tipo y mes
-}
-```
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "total_collected": 150000,
-    "total_pending": 35000,
-    "by_type": {
-      "donation": 20000,
-      "fine": 45000,
-      "contribution": 60000,
-      "fee": 25000
-    },
-    "by_month": [
-      {
-        "month": "2026-01",
-        "collected": 12000,
-        "pending": 3000
-      }
-    ]
-  }
-}
-```
-
----
-
-## GET `/api/v1/parents/:id/financial-status`
-
-**Descripción:** Retorna el estado combinado de ingresos y multas por padre.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function getFinancialStatus(parentId) {
-  // Recibe: id del padre
-
-  // Consulta: todos los ingresos del padre (suma total)
-  // Consulta: todas las multas del padre (suma total, pagadas, pendientes)
-  // Calcula: balance = ingresos - multas pendientes
-
-  // Devuelve: resumen financiero del padre
-}
-```
-
-**Parámetros de ruta:**
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID del padre |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "parent_id": 5,
-    "parent_name": "Carlos López",
-    "income": {
-      "total": 25000,
-      "count": 5
-    },
-    "fines": {
-      "total": 10000,
-      "pending": 5000,
-      "paid": 5000,
-      "count": 3
-    },
-    "balance": 15000
-  }
+estadoFinanciero {
+  RD.padreExiste();          // el padre debe existir
+  calcularIngresos();        // SELECT COUNT(*), COALESCE(SUM(amount), 0) FROM ingreso
+                             // WHERE parent_id = ? AND deleted_at IS NULL
+  calcularMultas();          // SELECT COUNT(*), COALESCE(SUM(amount), 0) as total,
+                             //   SUM(CASE WHEN paid = 1 THEN amount ELSE 0 END) as paid,
+                             //   SUM(CASE WHEN paid = 0 THEN amount ELSE 0 END) as pending,
+                             //   SUM(CASE WHEN paid = 0 THEN 1 ELSE 0 END) as pending_count
+                             // FROM multa WHERE parent_id = ? AND deleted_at IS NULL
+  calcularBalance();         // balance = incomeTotal - finesPending
+  retornarDatos();           // retorna { parent_id, parent_name, income: {total, count},
+                             //   fines: {total, pending, paid, count}, balance }
 }
 ```

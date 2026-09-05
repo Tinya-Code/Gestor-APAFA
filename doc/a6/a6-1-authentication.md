@@ -1,301 +1,59 @@
 # A6 M1 — Autenticación y Roles
 
----
+## Login
 
-## POST `/api/v1/auth/login`
+**#1 — POST /auth/login** — Iniciar sesión — Retorna: Token + Usuario
 
-**Descripción:** Autentica un usuario y retorna un token JWT.
-
-**Actores:** N1–N5
-
-**Pseudocódigo:**
-
-```javascript
-function login(email, password) {
-  // Recibe: email y contraseña del usuario
-
-  // Valida: que el email exista en la base de datos
-  // y que la contraseña coincida con el hash almacenado
-
-  // Procesa: genera un token JWT con el id del usuario,
-  // su rol y una fecha de expiración
-
-  // Devuelve: el token JWT y los datos básicos del usuario
-  // (id, nombre, apellido, rol)
+```
+login {
+  RD.loginCredenciales();    // email y password no están vacíos, formato email válido
+  autenticarFirebase();      // llama a Firebase Auth REST API con email y password
+  buscarOCrearUsuario();     // busca usuario por firebase_uid, si no existe lo crea
+  generarJwt();              // crea JWT con payload: sub, role, email, expira 24h
+  retornarToken();           // retorna access_token, token_type, expires_in y datos del usuario
 }
 ```
 
-**Cuerpo de la solicitud:**
+**#2 — POST /auth/logout** — Cerrar sesión — Retorna: Mensaje
 
-```json
-{
-  "email": "usuario@ejemplo.com",
-  "password": "string"
+```
+logout {
+  extraerToken();            // valida formato "Bearer <token>", extrae el JWT
+  revocarToken();            // agrega token a blacklist en Redis/BD con TTL = tiempo restante
+  retornarMensaje();         // retorna "Sesión cerrada exitosamente"
 }
 ```
 
-| Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
-| email | string | ✅ | Email del usuario |
-| password | string | ✅ | Contraseña del usuario |
+**#3 — GET /auth/me** — Obtener perfil del usuario — Retorna: Datos
 
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIs...",
-    "user": {
-      "id": 1,
-      "email": "usuario@ejemplo.com",
-      "name": "Juan",
-      "surname": "Pérez",
-      "role": "admin"
-    }
-  }
+```
+obtenerPerfil {
+  validarToken();            // verifica firma, expiración y blacklist
+  decodificarPayload();      // extrae sub, role, email del JWT
+  buscarUsuario();           // consulta usuario en BD con parent_id o board_member_id según rol
+  retornarDatos();           // retorna id, email, name, surname, dni, phone, role, parent_id, board_member_id
 }
 ```
 
-**Errores:**
+**#4 — GET /roles** — Listar roles — Retorna: Datos
 
-| Código | Descripción |
-|--------|-------------|
-| 401 | Credenciales inválidas |
-| 422 | Error de validación (campos faltantes) |
-
----
-
-## POST `/api/v1/auth/logout`
-
-**Descripción:** Invalida el token de sesión actual.
-
-**Actores:** N1–N5
-
-**Pseudocódigo:**
-
-```javascript
-function logout(token) {
-  // Recibe: el token JWT de la sesión activa
-
-  // Procesa: agrega el token a una lista de tokens revocados
-  // para que no pueda usarse nuevamente
-
-  // Devuelve: confirmación de cierre de sesión
+```
+listarRoles {
+  RD.adminOnly();            // solo administradores (N1) pueden listar roles
+  consultarRoles();          // SELECT * FROM roles ORDER BY id
+  retornarDatos();           // retorna [{ id, name, description }]
 }
 ```
 
-**Encabezados:**
+**#5 — PUT /roles/:id** — Asignar/editar rol — Retorna: Datos
 
 ```
-Authorization: Bearer <token>
-```
-
-**Cuerpo de la solicitud:** Ninguno
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "message": "Sesión cerrada exitosamente"
-  }
+editarRol {
+  RD.adminOnly();            // solo administradores (N1) pueden asignar roles
+  RD.rolValido();            // el rol debe ser: admin, president, vice_president, treasurer, secretary, parent
+  RD.usuarioExiste();        // el usuario destino debe existir
+  actualizarRol();           // UPDATE users SET role = ?, updated_at = NOW() WHERE id = ?
+  registrarAuditoria();      // registra quién hizo el cambio, cuándo y de qué a qué
+  retornarDatos();           // retorna { id, user_id, role, updated_at }
 }
 ```
-
-**Errores:**
-
-| Código | Descripción |
-|--------|-------------|
-| 401 | Token inválido o expirado |
-
----
-
-## GET `/api/v1/auth/me`
-
-**Descripción:** Retorna el perfil y rol del usuario autenticado.
-
-**Actores:** N1–N5
-
-**Pseudocódigo:**
-
-```javascript
-function getMe(token) {
-  // Recibe: el token JWT de la sesión activa
-
-  // Valida: que el token sea válido y no esté expirado
-  // Decodifica: el id del usuario del token
-
-  // Consulta: los datos completos del usuario en la base de datos
-  // incluyendo su rol y si está vinculado a un padre o directivo
-
-  // Devuelve: el perfil completo del usuario con su rol
-}
-```
-
-**Encabezados:**
-
-```
-Authorization: Bearer <token>
-```
-
-**Cuerpo de la solicitud:** Ninguno
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "id": 1,
-    "email": "usuario@ejemplo.com",
-    "name": "Juan",
-    "surname": "Pérez",
-    "dni": "12345678",
-    "phone": "+54 11 1234-5678",
-    "role": "admin",
-    "parent_id": null,
-    "board_member_id": null
-  }
-}
-```
-
-**Errores:**
-
-| Código | Descripción |
-|--------|-------------|
-| 401 | Token inválido o expirado |
-
----
-
-## GET `/api/v1/roles`
-
-**Descripción:** Lista todos los roles disponibles en el sistema.
-
-**Actores:** N1
-
-**Pseudocódigo:**
-
-```javascript
-function getRoles() {
-  // Recibe: nada (solo requiere autenticación de administrador)
-
-  // Valida: que el usuario tenga rol de administrador (N1)
-
-  // Consulta: todos los roles registrados en el sistema
-
-  // Devuelve: lista de roles con id, nombre y descripción
-}
-```
-
-**Encabezados:**
-
-```
-Authorization: Bearer <token>
-```
-
-**Cuerpo de la solicitud:** Ninguno
-
-**Respuesta (200):**
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "name": "admin",
-      "description": "Acceso total al sistema"
-    },
-    {
-      "id": 2,
-      "name": "president",
-      "description": "Presidente de la directiva"
-    },
-    {
-      "id": 3,
-      "name": "treasurer",
-      "description": "Operaciones financieras"
-    },
-    {
-      "id": 4,
-      "name": "secretary",
-      "description": "Solo lectura + asistencias"
-    },
-    {
-      "id": 5,
-      "name": "parent",
-      "description": "Acceso de padre"
-    }
-  ]
-}
-```
-
-**Errores:**
-
-| Código | Descripción |
-|--------|-------------|
-| 403 | Permisos insuficientes |
-
----
-
-## PUT `/api/v1/roles/:id`
-
-**Descripción:** Asigna o edita el rol de un usuario.
-
-**Actores:** N1
-
-**Pseudocódigo:**
-
-```javascript
-function updateRole(roleId, userId, newRole) {
-  // Recibe: id del rol, id del usuario y nuevo rol a asignar
-
-  // Valida: que el usuario tenga permisos de administrador (N1)
-  // Valida: que el rol exista en el sistema
-  // Valida: que el usuario exista
-
-  // Procesa: actualiza la asignación de rol del usuario
-  // Registra en auditoría quién hizo el cambio
-
-  // Devuelve: la asignación de rol actualizada con fecha de modificación
-}
-```
-
-**Parámetros de ruta:**
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID del rol |
-
-**Cuerpo de la solicitud:**
-
-```json
-{
-  "user_id": 5,
-  "role": "treasurer"
-}
-```
-
-| Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
-| user_id | integer | ✅ | Usuario al que asignar el rol |
-| role | string | ✅ | Nombre del rol (admin, president, treasurer, secretary, parent) |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "id": 1,
-    "user_id": 5,
-    "role": "treasurer",
-    "updated_at": "2026-01-15T10:30:00Z"
-  }
-}
-```
-
-**Errores:**
-
-| Código | Descripción |
-| -------- | ------------- |
-| 403 | Permisos insuficientes |
-| 404 | Rol o usuario no encontrado |
-| 422 | Error de validación |

@@ -1,312 +1,106 @@
 # A6 M4 — Asambleas
 
----
+## Asambleas
 
-## GET `/api/v1/assemblies`
+**#1 — GET /assemblies** — Listar asambleas — Retorna: Datos
 
-**Descripción:** Lista asambleas.
-
-**Actores:** N1–N4
-
-**Pseudocódigo:**
-
-```javascript
-function listAssemblies(page, limit, dateFrom, dateTo) {
-  // Recibe: paginación y filtros opcionales de fecha
-
-  // Consulta: asambleas en la base de datos
-  // Aplica filtros de fecha si se proporcionan
-  // Incluye: cantidad de detalles registrados
-
-  // Devuelve: lista de asambleas paginada
+```
+listarAsambleas {
+  parsearPaginacion();       // page=1, limit=20 por defecto
+  parsearFiltros();          // dateFrom y dateTo opcionales (YYYY-MM-DD)
+  construirConsulta();       // SELECT a.*, COUNT(da.id) as details_count FROM asamblea a
+                             // LEFT JOIN detalle_asamblea da ON da.assembly_id = a.id AND da.deleted_at IS NULL
+                             // WHERE a.deleted_at IS NULL
+                             // Si dateFrom: AND a.date >= ?
+                             // Si dateTo: AND a.date <= ?
+                             // GROUP BY a.id ORDER BY a.date DESC
+  ejecutarPaginado();        // ejecuta con LIMIT/OFFSET, cuenta total
+  retornarDatos();           // retorna { data: [...], pagination: { page, limit, total, total_pages } }
 }
 ```
 
-**Parámetros de consulta:**
+**#2 — GET /assemblies/:id** — Obtener asamblea por id — Retorna: Datos
 
-| Parámetro | Tipo | Requerido | Descripción |
-| ----------- | ------ | ----------- | ------------- |
-| page | integer | No | Número de página |
-| limit | integer | No | Resultados por página |
-| date_from | string | No | Filtrar desde fecha (YYYY-MM-DD) |
-| date_to | string | No | Filtrar hasta fecha (YYYY-MM-DD) |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "title": "Asamblea Anual 2026",
-      "date": "2026-03-15",
-      "description": "Revisión anual y aprobación de presupuesto",
-      "details_count": 3
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 12,
-    "total_pages": 1
-  }
+```
+detalleAsamblea {
+  RD.asambleaExiste();       // la asamblea existe en la base de datos
+  buscarAsamblea();          // SELECT * FROM asamblea WHERE id = ? AND deleted_at IS NULL
+  buscarDetalles();          // SELECT * FROM detalle_asamblea WHERE assembly_id = ? AND deleted_at IS NULL
+                             // ORDER BY registration_date
+  retornarDatos();           // retorna { id, title, date, description, details: [...] }
 }
 ```
 
----
+**#3 — POST /assemblies** — Registrar asamblea — Retorna: Datos
 
-## GET `/api/v1/assemblies/:id`
-
-**Descripción:** Retorna el detalle de una asamblea con sus detalles anidados.
-
-**Actores:** N1–N4
-
-**Pseudocódigo:**
-
-```javascript
-function getAssembly(assemblyId) {
-  // Recibe: id de la asamblea
-
-  // Consulta: datos de la asamblea
-  // Consulta: todos los detalles/acuerdos registrados
-
-  // Devuelve: la asamblea con su lista de detalles
+```
+nuevaAsamblea {
+  RD.nuevaAsamblea();        // title y date son obligatorios; formato YYYY-MM-DD
+  insertarAsamblea();        // INSERT INTO asamblea (title, date, description, created_at, updated_at)
+                             // VALUES (?, ?, ?, NOW(), NOW())
+  retornarDatos();           // retorna { id, title, date, description, created_at }
 }
 ```
 
-**Parámetros de ruta:**
+**#4 — PUT /assemblies/:id** — Actualizar asamblea — Retorna: Datos
 
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID de la asamblea |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "id": 1,
-    "title": "Asamblea Anual 2026",
-    "date": "2026-03-15",
-    "description": "Revisión anual y aprobación de presupuesto",
-    "details": [
-      {
-        "id": 1,
-        "description": "Presupuesto anual aprobado: $50.000",
-        "registration_date": "2026-03-15",
-        "image_url": "https://..."
-      }
-    ]
-  }
+```
+actualizarAsamblea {
+  RD.asambleaExiste();       // la asamblea existe en la base de datos
+  validarCambios();          // solo actualiza campos presentes (patch parcial)
+  actualizarCampos();        // UPDATE asamblea SET title=COALESCE(?,title), date=COALESCE(?,date),
+                             //   description=COALESCE(?,description), updated_at=NOW() WHERE id = ?
+  retornarDatos();           // retorna asamblea actualizada
 }
 ```
 
----
+**#5 — DELETE /assemblies/:id** — Eliminar asamblea — Retorna: Mensaje
 
-## POST `/api/v1/assemblies`
-
-**Descripción:** Registra una nueva asamblea.
-
-**Actores:** N1, N2
-
-**Pseudocódigo:**
-
-```javascript
-function createAssembly(data) {
-  // Recibe: título, fecha y descripción
-
-  // Valida: que los campos obligatorios estén presentes
-
-  // Procesa: crea el registro de la asamblea
-
-  // Devuelve: la asamblea creada con su id
+```
+eliminarAsamblea {
+  RD.adminOnly();            // solo administradores (N1)
+  RD.asambleaExiste();       // la asamblea existe en la base de datos
+  borrarLogicoCascada();     // UPDATE asamblea SET deleted_at = NOW() WHERE id = ?
+                             // UPDATE detalle_asamblea SET deleted_at = NOW() WHERE assembly_id = ?
+  retornarMensaje();         // retorna "Asamblea eliminada exitosamente"
 }
 ```
 
-**Cuerpo de la solicitud:**
+## Detalles de Asamblea
 
-```json
-{
-  "title": "Asamblea Anual 2026",
-  "date": "2026-03-15",
-  "description": "Revisión anual y aprobación de presupuesto"
+**#6 — POST /assemblies/:id/details** — Registrar detalle/acuerdo — Retorna: Datos
+
+```
+nuevoDetalle {
+  RD.asambleaExiste();       // la asamblea debe existir
+  RD.nuevoDetalle();         // description es obligatorio
+  insertarDetalle();         // INSERT INTO detalle_asamblea (assembly_id, description, registration_date, image_url, created_at, updated_at)
+                             // VALUES (?, ?, CURDATE(), ?, NOW(), NOW())
+                             // registration_date se asigna automáticamente con la fecha actual
+  retornarDatos();           // retorna { id, assembly_id, description, registration_date, image_url }
 }
 ```
 
-| Campo | Tipo | Requerido | Descripción |
-| ------- | ------ | ----------- | ------------- |
-| title | string | ✅ | Título de la asamblea |
-| date | string | ✅ | Fecha (YYYY-MM-DD) |
-| description | string | No | Descripción |
+**#7 — PUT /assemblies/:id/details/:detailId** — Actualizar detalle — Retorna: Datos
 
-**Respuesta (201):** Objeto asamblea con `id` y `created_at`.
-
----
-
-## PUT `/api/v1/assemblies/:id`
-
-**Descripción:** Edita una asamblea.
-
-**Actores:** N1, N2
-
-**Pseudocódigo:**
-
-```javascript
-function updateAssembly(assemblyId, data) {
-  // Recibe: id de la asamblea y campos a actualizar
-
-  // Valida: que la asamblea exista
-
-  // Procesa: actualiza solo los campos proporcionados
-
-  // Devuelve: la asamblea actualizada
+```
+actualizarDetalle {
+  RD.asambleaExiste();       // la asamblea debe existir
+  RD.detalleExiste();        // el detalle debe existir y pertenecer a la asamblea
+  actualizarCampos();        // UPDATE detalle_asamblea SET description=COALESCE(?,description),
+                             //   image_url=COALESCE(?,image_url), updated_at=NOW() WHERE id = ?
+  retornarDatos();           // retorna detalle actualizado
 }
 ```
 
-**Cuerpo de la solicitud:** Igual que POST (todos los campos opcionales).
+**#8 — DELETE /assemblies/:id/details/:detailId** — Eliminar detalle — Retorna: Mensaje
 
-**Respuesta (200):** Objeto asamblea actualizado.
-
----
-
-## DELETE `/api/v1/assemblies/:id`
-
-**Descripción:** Elimina una asamblea.
-
-**Actores:** N1
-
-**Pseudocódigo:**
-
-```javascript
-function deleteAssembly(assemblyId) {
-  // Recibe: id de la asamblea
-
-  // Valida: que el usuario sea administrador (N1)
-  // Valida: que la asamblea exista
-
-  // Procesa: elimina la asamblea y sus detalles (CASCADE)
-
-  // Devuelve: confirmación de eliminación
-}
 ```
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "message": "Asamblea eliminada exitosamente"
-  }
-}
-```
-
----
-
-## POST `/api/v1/assemblies/:id/details`
-
-**Descripción:** Registra un detalle/acuerdo en una asamblea.
-
-**Actores:** N1, N2, N4
-
-**Pseudocódigo:**
-
-```javascript
-function createAssemblyDetail(assemblyId, data) {
-  // Recibe: id de la asamblea, descripción y opcionalmente URL de imagen
-
-  // Valida: que la asamblea exista
-  // Valida: que la descripción esté presente
-
-  // Procesa: crea el detalle vinculado a la asamblea
-  // Registra automáticamente la fecha de registro
-
-  // Devuelve: el detalle creado con su id y fecha
-}
-```
-
-**Parámetros de ruta:**
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID de la asamblea |
-
-**Cuerpo de la solicitud:**
-
-```json
-{
-  "description": "Presupuesto anual aprobado: $50.000",
-  "image_url": "https://..."
-}
-```
-
-| Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
-| description | string | ✅ | Descripción del acuerdo/nota |
-| image_url | string | No | Foto del acta |
-
-**Respuesta (201):** Objeto detalle con `id` y `registration_date`.
-
----
-
-## PUT `/api/v1/assemblies/:id/details/:detailId`
-
-**Descripción:** Edita un detalle de asamblea.
-
-**Actores:** N1, N2, N4
-
-**Pseudocódigo:**
-
-```javascript
-function updateAssemblyDetail(assemblyId, detailId, data) {
-  // Recibe: ids de asamblea y detalle, campos a actualizar
-
-  // Valida: que la asamblea y el detalle existan
-
-  // Procesa: actualiza el detalle
-
-  // Devuelve: el detalle actualizado
-}
-```
-
-**Parámetros de ruta:**
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID de la asamblea |
-| detailId | integer | ID del detalle |
-
-**Cuerpo de la solicitud:** Igual que POST (todos los campos opcionales).
-
-**Respuesta (200):** Objeto detalle actualizado.
-
----
-
-## DELETE `/api/v1/assemblies/:id/details/:detailId`
-
-**Descripción:** Elimina un detalle de asamblea.
-
-**Actores:** N1, N2
-
-**Pseudocódigo:**
-
-```javascript
-function deleteAssemblyDetail(assemblyId, detailId) {
-  // Recibe: ids de asamblea y detalle
-
-  // Valida: que la asamblea y el detalle existan
-
-  // Procesa: elimina el registro del detalle
-
-  // Devuelve: confirmación de eliminación
-}
-```
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "message": "Detalle de asamblea eliminado exitosamente"
-  }
+eliminarDetalle {
+  RD.adminODirectivo();      // solo administradores (N1) o directivos
+  RD.asambleaExiste();       // la asamblea debe existir
+  RD.detalleExiste();        // el detalle debe existir y pertenecer a la asamblea
+  borrarLogico();            // UPDATE detalle_asamblea SET deleted_at = NOW() WHERE id = ?
+  retornarMensaje();         // retorna "Detalle de asamblea eliminado exitosamente"
 }
 ```

@@ -1,6 +1,6 @@
-# A6 — Especificación de Endpoints (Request / Response)
+# A6 — Especificación de Endpoints (Pseudocódigo)
 
-Especificación detallada de request y response para cada endpoint, agrupados por módulo.
+Especificación detallada de pseudocódigo con flujo de funciones para cada endpoint, agrupados por módulo.
 
 URL base: `http://localhost:3000/api/v1`
 
@@ -9,7 +9,7 @@ URL base: `http://localhost:3000/api/v1`
 ## Módulos
 
 | # | Módulo | Archivo | Endpoints |
-| --- | -------- | --------- | ----------- |
+|---|--------|---------|-----------|
 | M1 | Autenticación y Roles | [a6-1-authentication.md](./a6-1-authentication.md) | 5 |
 | M2 | Padres y Estudiantes | [a6-2-parents-students.md](./a6-2-parents-students.md) | 11 |
 | M3 | Directiva | [a6-3-board.md](./a6-3-board.md) | 5 |
@@ -26,59 +26,33 @@ URL base: `http://localhost:3000/api/v1`
 
 ---
 
-## Formatos de Respuesta Comunes
+## Documentos Relacionados
 
-### Éxito (200)
+| Documento | Contenido |
+|-----------|-----------|
+| [a7/](./a7/) | DTOs, reglas de dominio y request/response por endpoint |
+| [schema-mysql.sql](./schema-mysql.sql) | Esquema de base de datos MySQL |
 
-```json
-{
-  "data": { ... }
-}
-```
+---
 
-### Éxito con lista (200)
+## Convenciones
 
-```json
-{
-  "data": [ ... ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 150,
-    "total_pages": 8
-  }
-}
-```
+### Autenticación
 
-### Error (4xx/5xx)
+- **Firebase Auth** para autenticación inicial (email + contraseña)
+- JWT interno para sesiones (expira en 24h)
+- Todos los endpoints (excepto login) requieren header `Authorization: Bearer <token>`
 
-```json
-{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "El DNI es requerido"
-  }
-}
-```
+### Borrado Lógico
 
-### No encontrado (404)
+- Campo `deleted_at` en tablas principales
+- DELETE retorna 200 OK (borrado lógico, no físico)
+- Queries excluyen registros borrados automáticamente
 
-```json
-{
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Recurso no encontrado"
-  }
-}
-```
+### Reglas de Dominio (RD)
 
-### Prohibido (403)
-
-```json
-{
-  "error": {
-    "code": "FORBIDDEN",
-    "message": "Permisos insuficientes"
-  }
-}
-```
+Cada endpoint incluye reglas de dominio marcadas con `RD.funcion()` que validan:
+- Existencia de registros padre
+- Unicidad de campos
+- Permisos de rol
+- Validación de datos de entrada

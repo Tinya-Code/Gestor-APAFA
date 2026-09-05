@@ -1,338 +1,101 @@
 # A6 M7 — Multas
 
----
+**#1 — GET /fines** — Listar multas — Retorna: Datos
 
-## GET `/api/v1/fines`
-
-**Descripción:** Lista multas con filtros.
-
-**Actores:** N1–N4
-
-**Pseudocódigo:**
-
-```javascript
-function listFines(page, limit, parentId, eventId, paid) {
-  // Recibe: paginación y filtros opcionales (padre, evento, estado de pago)
-
-  // Consulta: multas en la base de datos
-  // Aplica filtros si se proporcionan
-  // Incluye: nombre del padre y título del evento
-
-  // Devuelve: lista de multas paginada
+```
+listarMultas {
+  parsearPaginacion();       // page=1, limit=20 por defecto
+  parsearFiltros();          // parentId, eventId, paid opcionales
+  construirConsulta();       // SELECT m.*, CONCAT(p.name, ' ', p.surname) as parent_name, e.title as event_title
+                             // FROM multa m
+                             // JOIN padre p ON p.id = m.parent_id
+                             // JOIN evento e ON e.id = m.event_id
+                             // WHERE m.deleted_at IS NULL
+                             // Si parentId: AND m.parent_id = ?
+                             // Si eventId: AND m.event_id = ?
+                             // Si paid !== null: AND m.paid = ?
+                             // ORDER BY m.generated_date DESC
+  ejecutarPaginado();        // ejecuta con LIMIT/OFFSET, cuenta total
+  retornarDatos();           // retorna { data: [...], pagination: { page, limit, total, total_pages } }
 }
 ```
 
-**Parámetros de consulta:**
+**#2 — GET /fines/:id** — Obtener multa por id — Retorna: Datos
 
-| Parámetro | Tipo | Requerido | Descripción |
-| ----------- | ------ | ----------- | ------------- |
-| page | integer | No | Número de página |
-| limit | integer | No | Resultados por página |
-| parent_id | integer | No | Filtrar por padre |
-| event_id | integer | No | Filtrar por evento |
-| paid | boolean | No | Filtrar por estado de pago |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "parent_id": 5,
-      "parent_name": "Carlos López",
-      "event_id": 1,
-      "event_title": "Festival Escolar",
-      "amount": 5000,
-      "paid": false,
-      "generated_date": "2026-04-11",
-      "payment_date": null
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 15,
-    "total_pages": 1
-  }
+```
+detalleMulta {
+  RD.multaExiste();          // la multa existe en la base de datos
+  buscarMulta();             // SELECT * FROM multa WHERE id = ? AND deleted_at IS NULL
+  buscarPadre();             // datos del padre sancionado
+  buscarEvento();            // datos del evento que generó la multa
+  retornarDatos();           // retorna { id, parent: {...}, event: {...}, amount, paid, generated_date, payment_date }
 }
 ```
 
----
+**#3 — POST /fines** — Registrar multa manual — Retorna: Datos
 
-## GET `/api/v1/fines/:id`
-
-**Descripción:** Retorna el detalle de una multa.
-
-**Actores:** N1–N4
-
-**Pseudocódigo:**
-
-```javascript
-function getFine(fineId) {
-  // Recibe: id de la multa
-
-  // Consulta: datos de la multa
-  // Consulta: información del padre y del evento
-
-  // Devuelve: la multa completa con datos del padre y evento
+```
+nuevaMulta {
+  RD.nuevaMulta();           // parent_id, event_id, amount son obligatorios; amount > 0
+  RD.padreExiste();          // el padre debe existir
+  RD.eventoExiste();         // el evento debe existir
+  insertarMulta();           // INSERT INTO multa (parent_id, event_id, amount, paid, generated_date, created_at, updated_at)
+                             // VALUES (?, ?, ?, 0, CURDATE(), NOW(), NOW())
+                             // paid = false por defecto, generated_date = fecha actual
+  retornarDatos();           // retorna multa con id, generated_date y paid: false
 }
 ```
 
-**Parámetros de ruta:**
+**#4 — POST /fines/generate** — Generar multas automáticas por inasistencia — Retorna: Datos
 
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID de la multa |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "id": 1,
-    "parent_id": 5,
-    "parent": {
-      "id": 5,
-      "name": "Carlos",
-      "surname": "López"
-    },
-    "event_id": 1,
-    "event": {
-      "id": 1,
-      "title": "Festival Escolar"
-    },
-    "amount": 5000,
-    "paid": false,
-    "generated_date": "2026-04-11",
-    "payment_date": null
-  }
+```
+generarMultas {
+  RD.eventoExiste();         // el evento debe existir
+  RD.generaMultas();         // generates_fine = true
+  buscarAusentes();          // SELECT a.parent_id FROM asistencia a
+                             // WHERE a.event_id = ? AND a.attended = 0 AND a.deleted_at IS NULL
+  crearMultasAusentes();     // para cada padre ausente:
+                             //   verifica que no tenga ya una multa para este evento
+                             //   INSERT INTO multa (parent_id, event_id, amount, paid, generated_date)
+                             //   VALUES (?, ?, event.fine_amount, 0, CURDATE())
+  retornarDatos();           // retorna { generated: count, event_id, message: "X multas generadas" }
 }
 ```
 
----
+**#5 — PUT /fines/:id** — Editar multa — Retorna: Datos
 
-## POST `/api/v1/fines`
-
-**Descripción:** Registra una multa manual.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function createFine(data) {
-  // Recibe: id del padre, id del evento y monto
-
-  // Valida: que el padre exista
-  // Valida: que el evento exista
-  // Valida: que el monto sea positivo
-
-  // Procesa: crea la multa con estado "no pagado" y fecha actual
-
-  // Devuelve: la multa creada
+```
+actualizarMulta {
+  RD.multaExiste();          // la multa existe en la base de datos
+  validarCambios();          // si paid=true, payment_date debe estar presente; amount > 0 si se envía
+  actualizarCampos();        // UPDATE multa SET amount=COALESCE(?,amount), paid=COALESCE(?,paid),
+                             //   payment_date=COALESCE(?,payment_date), updated_at=NOW() WHERE id = ?
+  retornarDatos();           // retorna multa actualizada
 }
 ```
 
-**Cuerpo de la solicitud:**
+**#6 — DELETE /fines/:id** — Eliminar multa — Retorna: Mensaje
 
-```json
-{
-  "parent_id": 5,
-  "event_id": 1,
-  "amount": 5000
+```
+eliminarMulta {
+  RD.adminOnly();            // solo administradores (N1)
+  RD.multaExiste();          // la multa existe en la base de datos
+  borrarLogico();            // UPDATE multa SET deleted_at = NOW() WHERE id = ?
+  retornarMensaje();         // retorna "Multa eliminada exitosamente"
 }
 ```
 
-| Campo | Tipo | Requerido | Descripción |
-| ------- | ------ | ----------- | ------------- |
-| parent_id | integer | ✅ | ID del padre |
-| event_id | integer | ✅ | ID del evento |
-| amount | number | ✅ | Monto de la multa |
+**#7 — GET /parents/:id/fines** — Estado de multas de un padre — Retorna: Datos
 
-**Respuesta (201):** Objeto multa con `id`, `generated_date` y `paid: false`.
-
----
-
-## POST `/api/v1/fines/generate`
-
-**Descripción:** Genera multas automáticas por inasistencia (proceso por lote).
-
-**Actores:** N1, N6
-
-**Pseudocódigo:**
-
-```javascript
-function generateFines(eventId) {
-  // Recibe: id del evento
-
-  // Valida: que el evento exista
-  // Valida: que el evento tenga genera_fine = true
-
-  // Consulta: todos los padres que no asistieron al evento
-  // (cruza registros de asistencia con attended = false)
-
-  // Procesa: para cada padre ausente, crea una multa
-  // con el monto definido en el evento (fine_amount)
-
-  // Devuelve: cantidad de multas generadas
-}
 ```
-
-**Cuerpo de la solicitud:**
-
-```json
-{
-  "event_id": 1
-}
-```
-
-| Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
-| event_id | integer | ✅ | ID del evento para generar multas |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "generated": 12,
-    "event_id": 1,
-    "message": "12 multas generadas para padres ausentes"
-  }
-}
-```
-
-**Lógica:** Cruza los registros de asistencia donde `attended: false` con eventos donde `generates_fine: true`. Crea una multa por cada padre ausente usando el `fine_amount` del evento.
-
----
-
-## PUT `/api/v1/fines/:id`
-
-**Descripción:** Edita una multa (monto o estado de pago).
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function updateFine(fineId, data) {
-  // Recibe: id de la multa y campos a actualizar
-
-  // Valida: que la multa exista
-
-  // Procesa: actualiza los campos proporcionados
-  // Si se marca como pagado, registra la fecha de pago
-
-  // Devuelve: la multa actualizada
-}
-```
-
-**Parámetros de ruta:**
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID de la multa |
-
-**Cuerpo de la solicitud:**
-
-```json
-{
-  "amount": 6000,
-  "paid": true,
-  "payment_date": "2026-05-01"
-}
-```
-
-| Campo | Tipo | Requerido | Descripción |
-| ------- | ------ | ----------- | ------------- |
-| amount | number | No | Monto actualizado |
-| paid | boolean | No | Estado de pago |
-| payment_date | string | No | Fecha de pago (YYYY-MM-DD) |
-
-**Respuesta (200):** Objeto multa actualizado.
-
----
-
-## DELETE `/api/v1/fines/:id`
-
-**Descripción:** Elimina una multa.
-
-**Actores:** N1
-
-**Pseudocódigo:**
-
-```javascript
-function deleteFine(fineId) {
-  // Recibe: id de la multa
-
-  // Valida: que el usuario sea administrador (N1)
-  // Valida: que la multa exista
-
-  // Procesa: elimina el registro de la multa
-
-  // Devuelve: confirmación de eliminación
-}
-```
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "message": "Multa eliminada exitosamente"
-  }
-}
-```
-
----
-
-## GET `/api/v1/parents/:id/fines`
-
-**Descripción:** Retorna el estado de multas de un padre específico.
-
-**Actores:** N1–N4
-
-**Pseudocódigo:**
-
-```javascript
-function getParentFines(parentId) {
-  // Recibe: id del padre
-
-  // Consulta: todas las multas del padre
-  // Calcula: totales pagados y pendientes
-
-  // Devuelve: resumen de multas con montos totales y cantidad
-}
-```
-
-**Parámetros de ruta:**
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID del padre |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "parent_id": 5,
-    "parent_name": "Carlos López",
-    "total_fines": 3,
-    "total_amount": 15000,
-    "paid_count": 1,
-    "pending_count": 2,
-    "pending_amount": 10000,
-    "fines": [
-      {
-        "id": 1,
-        "event_title": "Festival Escolar",
-        "amount": 5000,
-        "paid": true,
-        "payment_date": "2026-05-01"
-      }
-    ]
-  }
+multasPadre {
+  RD.padreExiste();          // el padre debe existir
+  buscarMultas();            // SELECT m.*, e.title as event_title FROM multa m
+                             // JOIN evento e ON e.id = m.event_id
+                             // WHERE m.parent_id = ? AND m.deleted_at IS NULL
+                             // ORDER BY m.generated_date DESC
+  calcularResumen();         // total_fines, total_amount, paid_count, pending_count, pending_amount
+  retornarDatos();           // retorna { parent_id, parent_name, total_fines, total_amount,
+                             //   paid_count, pending_count, pending_amount, fines: [...] }
 }
 ```

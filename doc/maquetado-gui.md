@@ -203,16 +203,11 @@ Para cada pantalla, verificar:
   │    │     │     │     └── /ingresos/:id           [ Detalle ingreso ]
   │    │     │     └── /padres/:id/estado-financiero [ F8 — Estado financiero ]
   │    │     │
-  │    │     └── /padres/nuevo              [ Formulario crear padre ]
+  │    │     └── /padres/nuevo              [ Formulario crear padre ] [ Formulario crear /*asignar estudiante ]
   │    │
-  │    └── /estudiantes                     [ Lista de estudiantes ]
-  │          │
-  │          ├── /estudiantes/:id           [ Detalle estudiante ]
-  │          │     │
-  │          │     ├── /estudiantes/:id/editar       [ Formulario editar estudiante ]
-  │          │     └── (selector reasignar padre)    [ PATCH parent ]
-  │          │
-  │          └── /estudiantes/nuevo         [ Formulario crear estudiante ]
+       └── /estudiantes/nuevo         [ Formulario crear estudiante ]
+       ├── /estudiantes/:id/editar       [ Formulario editar estudiante ]
+
   │
   │
   ├─── F3  DIRECTIVA ─────────────────────────────────────

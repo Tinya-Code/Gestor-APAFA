@@ -1,450 +1,150 @@
 # A6 M9 — Gastos
 
----
+## Gastos
 
-## GET `/api/v1/expenses`
+**#1 — GET /expenses** — Listar gastos — Retorna: Datos
 
-**Descripción:** Lista gastos con filtros.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function listExpenses(page, limit, type, dateFrom, dateTo) {
-  // Recibe: paginación y filtros opcionales (tipo, fecha)
-
-  // Consulta: gastos en la base de datos
-  // Aplica filtros si se proporcionan
-  // Incluye: número de comprobante y título del evento
-
-  // Devuelve: lista de gastos paginada
+```
+listarGastos {
+  parsearPaginacion();       // page=1, limit=20 por defecto
+  parsearFiltros();          // type, dateFrom, dateTo opcionales
+  construirConsulta();       // SELECT g.*, e.title as event_title, c.receipt_number
+                             // FROM gasto g
+                             // LEFT JOIN evento e ON e.id = g.event_id
+                             // LEFT JOIN comprobante c ON c.id = g.receipt_id
+                             // WHERE g.deleted_at IS NULL
+                             // Si type: AND g.type = ?
+                             // Si dateFrom: AND g.date >= ?
+                             // Si dateTo: AND g.date <= ?
+                             // ORDER BY g.date DESC
+  ejecutarPaginado();        // ejecuta con LIMIT/OFFSET, cuenta total
+  retornarDatos();           // retorna { data: [...], pagination: { page, limit, total, total_pages } }
 }
 ```
 
-**Parámetros de consulta:**
+**#2 — GET /expenses/:id** — Obtener gasto por id — Retorna: Datos
 
-| Parámetro | Tipo | Requerido | Descripción |
-| ----------- | ------ | ----------- | ------------- |
-| page | integer | No | Número de página |
-| limit | integer | No | Resultados por página |
-| type | string | No | Filtrar por tipo (mantenimiento, actividad, etc.) |
-| date_from | string | No | Filtrar desde fecha |
-| date_to | string | No | Filtrar hasta fecha |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "event_id": 1,
-      "event_title": "Festival Escolar",
-      "receipt_id": 1,
-      "receipt_number": "FAC-001",
-      "board_member_id": 2,
-      "total": 15000,
-      "type": "activity",
-      "date": "2026-04-10",
-      "description": "Decoraciones del festival"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 30,
-    "total_pages": 2
-  }
+```
+detalleGasto {
+  RD.gastoExiste();          // el gasto existe en la base de datos
+  buscarGasto();             // SELECT * FROM gasto WHERE id = ? AND deleted_at IS NULL
+  buscarComprobante();       // SELECT * FROM comprobante WHERE id = ?
+  buscarItems();             // SELECT * FROM item_gasto WHERE receipt_id = ?
+  retornarDatos();           // retorna { id, event_title, receipt: {...}, items: [...], total, type, date, description }
 }
 ```
 
----
+**#3 — POST /expenses** — Registrar gasto — Retorna: Datos
 
-## GET `/api/v1/expenses/:id`
-
-**Descripción:** Retorna el detalle de un gasto con comprobante e items.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function getExpense(expenseId) {
-  // Recibe: id del gasto
-
-  // Consulta: datos del gasto
-  // Consulta: comprobante asociado
-  // Consulta: items del comprobante
-
-  // Devuelve: el gasto completo con comprobante e items anidados
+```
+nuevoGasto {
+  RD.nuevoGasto();           // receipt_id, total, type, date son obligatorios; total > 0
+  RD.comprobanteExiste();    // el comprobante debe existir
+  insertarGasto();           // INSERT INTO gasto (event_id, receipt_id, board_member_id, total, type, date, description, created_at, updated_at)
+                             // VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+  crearMovimiento();         // INSERT INTO movimiento (type, amount, date, description, reference_id, reference_type, created_at, updated_at)
+                             // VALUES ('egreso', ?, ?, ?, ?, 'gasto', NOW(), NOW())
+  retornarDatos();           // retorna gasto con id y created_at
 }
 ```
 
-**Parámetros de ruta:**
+**#4 — PUT /expenses/:id** — Editar gasto — Retorna: Datos
 
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID del gasto |
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "id": 1,
-    "event_id": 1,
-    "event_title": "Festival Escolar",
-    "receipt": {
-      "id": 1,
-      "board_member_id": 2,
-      "number": "FAC-001",
-      "type": "invoice",
-      "date": "2026-04-10",
-      "description": "Suministros de decoración"
-    },
-    "items": [
-      {
-        "id": 1,
-        "description": "Globos (100 unidades)",
-        "amount": 5000
-      },
-      {
-        "id": 2,
-        "description": "Cintas y banderines",
-        "amount": 3000
-      }
-    ],
-    "total": 15000,
-    "type": "activity",
-    "date": "2026-04-10",
-    "description": "Decoraciones del festival"
-  }
+```
+actualizarGasto {
+  RD.gastoExiste();          // el gasto existe en la base de datos
+  validarCambios();          // solo actualiza campos presentes (patch parcial)
+  actualizarCampos();        // UPDATE gasto SET total=COALESCE(?,total), type=COALESCE(?,type),
+                             //   date=COALESCE(?,date), description=COALESCE(?,description), updated_at=NOW()
+                             //   WHERE id = ?
+  retornarDatos();           // retorna gasto actualizado
 }
 ```
 
----
+**#5 — DELETE /expenses/:id** — Eliminar gasto — Retorna: Mensaje
 
-## POST `/api/v1/expenses`
-
-**Descripción:** Registra un nuevo gasto.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function createExpense(data) {
-  // Recibe: id del evento (opcional), id del comprobante, total,
-  // tipo, fecha y descripción
-
-  // Valida: que el comprobante exista
-  // Valida: que los campos obligatorios estén presentes
-
-  // Procesa: crea el registro de gasto
-  // Crea automáticamente un registro en la tabla de movimientos (tipo: egreso)
-
-  // Devuelve: el gasto creado
+```
+eliminarGasto {
+  RD.adminOnly();            // solo administradores (N1)
+  RD.gastoExiste();          // el gasto existe en la base de datos
+  borrarLogicoCascada();     // UPDATE gasto SET deleted_at = NOW() WHERE id = ?
+                             // UPDATE movimiento SET deleted_at = NOW() WHERE reference_id = ? AND reference_type = 'gasto'
+  retornarMensaje();         // retorna "Gasto eliminado exitosamente"
 }
 ```
 
-**Cuerpo de la solicitud:**
+## Comprobantes
 
-```json
-{
-  "event_id": 1,
-  "receipt_id": 1,
-  "total": 15000,
-  "type": "activity",
-  "date": "2026-04-10",
-  "description": "Decoraciones del festival"
+**#6 — POST /receipts** — Registrar comprobante — Retorna: Datos
+
+```
+nuevoComprobante {
+  RD.nuevoComprobante();     // board_member_id, receipt_number, type, date son obligatorios
+  RD.directivoExiste();      // el directivo debe existir
+  RD.numeroUnico();          // receipt_number debe ser único entre comprobantes activos
+  insertarComprobante();     // INSERT INTO comprobante (board_member_id, receipt_number, type, date, description, created_at, updated_at)
+                             // VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+  retornarDatos();           // retorna comprobante con id
 }
 ```
 
-| Campo | Tipo | Requerido | Descripción |
-| ------- | ------ | ----------- | ------------- |
-| event_id | integer | No | Evento asociado (nullable) |
-| receipt_id | integer | ✅ | ID del comprobante |
-| total | number | ✅ | Monto total |
-| type | string | ✅ | Categoría (mantenimiento, actividad, etc.) |
-| date | string | ✅ | Fecha (YYYY-MM-DD) |
-| description | string | No | Descripción |
+**#7 — PUT /receipts/:id** — Editar comprobante — Retorna: Datos
 
-**Respuesta (201):** Objeto gasto con `id` y `created_at`.
-
-**Efecto secundario:** Crea un registro correspondiente en la tabla Transaction (type: expense).
-
----
-
-## PUT `/api/v1/expenses/:id`
-
-**Descripción:** Edita un gasto (reclasificar tipo/fecha).
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function updateExpense(expenseId, data) {
-  // Recibe: id del gasto y campos a actualizar
-
-  // Valida: que el gasto exista
-
-  // Procesa: actualiza los campos proporcionados
-
-  // Devuelve: el gasto actualizado
+```
+actualizarComprobante {
+  RD.comprobanteExiste();    // el comprobante existe en la base de datos
+  validarCambios();          // solo actualiza campos presentes (patch parcial)
+  actualizarCampos();        // UPDATE comprobante SET receipt_number=COALESCE(?,receipt_number),
+                             //   type=COALESCE(?,type), date=COALESCE(?,date),
+                             //   description=COALESCE(?,description), updated_at=NOW() WHERE id = ?
+  retornarDatos();           // retorna comprobante actualizado
 }
 ```
 
-**Cuerpo de la solicitud:** Igual que POST (todos los campos opcionales).
+**#8 — DELETE /receipts/:id** — Eliminar comprobante — Retorna: Mensaje
 
-**Respuesta (200):** Objeto gasto actualizado.
-
----
-
-## DELETE `/api/v1/expenses/:id`
-
-**Descripción:** Elimina un gasto.
-
-**Actores:** N1
-
-**Pseudocódigo:**
-
-```javascript
-function deleteExpense(expenseId) {
-  // Recibe: id del gasto
-
-  // Valida: que el usuario sea administrador (N1)
-  // Valida: que el gasto exista
-
-  // Procesa: elimina el gasto
-  // Elimina o anula el movimiento asociado
-
-  // Devuelve: confirmación de eliminación
+```
+eliminarComprobante {
+  RD.adminOnly();            // solo administradores (N1)
+  RD.comprobanteExiste();    // el comprobante existe en la base de datos
+  borrarLogicoCascada();     // UPDATE comprobante SET deleted_at = NOW() WHERE id = ?
+                             // UPDATE item_gasto SET deleted_at = NOW() WHERE receipt_id = ?
+  retornarMensaje();         // retorna "Comprobante eliminado exitosamente"
 }
 ```
 
-**Respuesta (200):**
+## Items de Gasto
 
-```json
-{
-  "data": {
-    "message": "Gasto eliminado exitosamente"
-  }
+**#9 — POST /receipts/:id/items** — Registrar item de gasto — Retorna: Datos
+
+```
+nuevoItem {
+  RD.comprobanteExiste();    // el comprobante debe existir
+  RD.nuevoItem();            // description y amount son obligatorios; amount > 0
+  insertarItem();            // INSERT INTO item_gasto (receipt_id, description, amount, created_at, updated_at)
+                             // VALUES (?, ?, ?, NOW(), NOW())
+  retornarDatos();           // retorna item con id
 }
 ```
 
----
+**#10 — PUT /receipts/:id/items/:itemId** — Editar item de gasto — Retorna: Datos
 
-## POST `/api/v1/receipts`
-
-**Descripción:** Registra un nuevo comprobante.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function createReceipt(data) {
-  // Recibe: id del directivo, número, tipo, fecha y descripción
-
-  // Valida: que el directivo exista
-  // Valida: que el número de comprobante no esté duplicado
-
-  // Procesa: crea el registro del comprobante
-
-  // Devuelve: el comprobante creado
+```
+actualizarItem {
+  RD.itemExiste();           // el item debe existir y pertenecer al comprobante
+  actualizarCampos();        // UPDATE item_gasto SET description=COALESCE(?,description),
+                             //   amount=COALESCE(?,amount), updated_at=NOW() WHERE id = ?
+  retornarDatos();           // retorna item actualizado
 }
 ```
 
-**Cuerpo de la solicitud:**
+**#11 — DELETE /receipts/:id/items/:itemId** — Eliminar item de gasto — Retorna: Mensaje
 
-```json
-{
-  "board_member_id": 2,
-  "number": "FAC-001",
-  "type": "invoice",
-  "date": "2026-04-10",
-  "description": "Suministros de decoración"
-}
 ```
-
-| Campo | Tipo | Requerido | Descripción |
-| ------- | ------ | ----------- | ------------- |
-| board_member_id | integer | ✅ | Directivo responsable |
-| number | string | ✅ | Número del comprobante (único) |
-| type | string | ✅ | Tipo de comprobante (invoice, ticket, etc.) |
-| date | string | ✅ | Fecha de emisión |
-| description | string | No | Descripción |
-
-**Respuesta (201):** Objeto comprobante con `id`.
-
----
-
-## PUT `/api/v1/receipts/:id`
-
-**Descripción:** Edita un comprobante.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function updateReceipt(receiptId, data) {
-  // Recibe: id del comprobante y campos a actualizar
-
-  // Valida: que el comprobante exista
-
-  // Procesa: actualiza los campos proporcionados
-
-  // Devuelve: el comprobante actualizado
-}
-```
-
-**Cuerpo de la solicitud:** Igual que POST (todos los campos opcionales).
-
-**Respuesta (200):** Objeto comprobante actualizado.
-
----
-
-## DELETE `/api/v1/receipts/:id`
-
-**Descripción:** Elimina un comprobante.
-
-**Actores:** N1
-
-**Pseudocódigo:**
-
-```javascript
-function deleteReceipt(receiptId) {
-  // Recibe: id del comprobante
-
-  // Valida: que el usuario sea administrador (N1)
-  // Valida: que el comprobante exista
-
-  // Procesa: elimina el comprobante y sus items (CASCADE)
-
-  // Devuelve: confirmación de eliminación
-}
-```
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "message": "Comprobante eliminado exitosamente"
-  }
-}
-```
-
----
-
-## POST `/api/v1/receipts/:id/items`
-
-**Descripción:** Registra un item de gasto sobre un comprobante.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function createExpenseItem(receiptId, data) {
-  // Recibe: id del comprobante, descripción y monto
-
-  // Valida: que el comprobante exista
-  // Valida: que la descripción y monto estén presentes
-
-  // Procesa: crea el item vinculado al comprobante
-
-  // Devuelve: el item creado
-}
-```
-
-**Parámetros de ruta:**
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID del comprobante |
-
-**Cuerpo de la solicitud:**
-
-```json
-{
-  "description": "Globos (100 unidades)",
-  "amount": 5000
-}
-```
-
-| Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
-| description | string | ✅ | Descripción del item |
-| amount | number | ✅ | Monto del item |
-
-**Respuesta (201):** Objeto item con `id`.
-
----
-
-## PUT `/api/v1/receipts/:id/items/:itemId`
-
-**Descripción:** Edita un item de gasto.
-
-**Actores:** N1, N2, N3
-
-**Pseudocódigo:**
-
-```javascript
-function updateExpenseItem(receiptId, itemId, data) {
-  // Recibe: ids de comprobante e item, campos a actualizar
-
-  // Valida: que el item exista en el comprobante
-
-  // Procesa: actualiza los campos del item
-
-  // Devuelve: el item actualizado
-}
-```
-
-**Parámetros de ruta:**
-
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | integer | ID del comprobante |
-| itemId | integer | ID del item |
-
-**Cuerpo de la solicitud:** Igual que POST (todos los campos opcionales).
-
-**Respuesta (200):** Objeto item actualizado.
-
----
-
-## DELETE `/api/v1/receipts/:id/items/:itemId`
-
-**Descripción:** Elimina un item de gasto.
-
-**Actores:** N1
-
-**Pseudocódigo:**
-
-```javascript
-function deleteExpenseItem(receiptId, itemId) {
-  // Recibe: ids de comprobante e item
-
-  // Valida: que el usuario sea administrador (N1)
-  // Valida: que el item exista
-
-  // Procesa: elimina el item del comprobante
-
-  // Devuelve: confirmación de eliminación
-}
-```
-
-**Respuesta (200):**
-
-```json
-{
-  "data": {
-    "message": "Item de gasto eliminado exitosamente"
-  }
+eliminarItem {
+  RD.adminOnly();            // solo administradores (N1)
+  RD.itemExiste();           // el item debe existir y pertenecer al comprobante
+  borrarLogico();            // UPDATE item_gasto SET deleted_at = NOW() WHERE id = ?
+  retornarMensaje();         // retorna "Item de gasto eliminado exitosamente"
 }
 ```
