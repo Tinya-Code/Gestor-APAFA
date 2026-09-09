@@ -1,4 +1,6 @@
-# A8 M11 — Request/Response — Avisos
+# A8 M11 — Request/Response — Avisos (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 ### GET `/api/v1/notices`
 

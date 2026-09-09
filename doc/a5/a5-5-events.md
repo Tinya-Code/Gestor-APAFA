@@ -1,6 +1,8 @@
-# M5 / F5 — Eventos
+# M5 / F5 — Eventos (Multi-Tenant)
 
-**Entidad:** Event
+**Entidad:** Evento
+
+> **Multi-Tenant:** Todos los endpoints filtran por `colegio_id` del token JWT.
 
 ---
 
@@ -8,11 +10,11 @@
 
 | # | Método | Endpoint | Descripción | Actores | Caso de Uso |
 |---|--------|----------|-------------|---------|-------------|
-| 1 | GET | `/api/v1/events` | Lista eventos | N1–N5 | Listar eventos |
-| 2 | GET | `/api/v1/events/:id` | Detalle de evento (flags: genera_multa, genera_asistencia, etc.) | N1–N5 | Ver detalle de evento |
-| 3 | POST | `/api/v1/events` | Registra un evento | N1, N2 | Registrar evento |
-| 4 | PUT | `/api/v1/events/:id` | Edita un evento | N1, N2 | Editar evento |
-| 5 | DELETE | `/api/v1/events/:id` | Elimina un evento | N1 | Eliminar evento |
+| 1 | GET | `/api/v1/events` | Lista eventos DEL COLEGIO | N0–N5 | Listar eventos |
+| 2 | GET | `/api/v1/events/:id` | Detalle de evento DEL COLEGIO | N0–N5 | Ver detalle de evento |
+| 3 | POST | `/api/v1/events` | Registra un evento EN EL COLEGIO | N0, N1, N2 | Registrar evento |
+| 4 | PUT | `/api/v1/events/:id` | Edita un evento DEL COLEGIO | N0, N1, N2 | Editar evento |
+| 5 | DELETE | `/api/v1/events/:id` | Elimina un evento DEL COLEGIO | N0, N1 | Eliminar evento |
 
 ---
 
@@ -38,10 +40,10 @@
 
 ## Casos de Uso (de A4)
 
-| Caso de Uso | N1 | N2 | N3 | N4 | N5 | N6 |
-|-------------|:--:|:--:|:--:|:--:|:--:|:--:|
-| Listar eventos | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Ver detalle de evento | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Registrar evento | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Editar evento | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Eliminar evento | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Caso de Uso | N0 | N1 | N2 | N3 | N4 | N5 | N6 |
+|-------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Listar eventos | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Ver detalle de evento | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Registrar evento | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Editar evento | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Eliminar evento | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |

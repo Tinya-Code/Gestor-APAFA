@@ -1,4 +1,6 @@
-# A8 M10 — Request/Response — Movimientos y Reportes
+# A8 M10 — Request/Response — Movimientos y Reportes (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 ### GET `/api/v1/transactions`
 

@@ -1,4 +1,6 @@
-# A7 — DTOs, Reglas de Dominio y Request/Response
+# A7 — DTOs, Reglas de Dominio y Request/Response (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT.
 
 Definición de Data Transfer Objects, reglas de negocio y formatos de solicitud/respuesta para cada endpoint, agrupados por módulo.
 
@@ -98,7 +100,14 @@ Todos los endpoints (excepto `POST /auth/login`) requieren header:
 Authorization: Bearer <token>
 ```
 
-El token es un JWT firmado por el backend con payload: `{ sub, role, email }`.
+El token es un JWT firmado por el backend con payload: `{ sub, email, role, colegio_id, is_super_admin }`.
+
+### Multi-Tenant
+
+- Todos los endpoints filtran por `colegio_id` del token JWT
+- El super_admin (N0) puede ver datos de todos los colegios
+- El admin_colegio (N1) solo puede ver datos de su colegio
+- El DNI de padres es único POR COLEGIO, no global
 
 ### Borrado Lógico
 

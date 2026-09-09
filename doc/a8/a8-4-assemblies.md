@@ -1,4 +1,6 @@
-# A8 M4 — Request/Response — Asambleas
+# A8 M4 — Request/Response — Asambleas (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 ## Asambleas
 

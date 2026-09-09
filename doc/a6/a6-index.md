@@ -1,4 +1,6 @@
-# A6 — Especificación de Endpoints (Pseudocódigo)
+# A6 — Especificación de Endpoints (Pseudocódigo) (Multi-Tenant)
+
+> **Multi-Tenant:** Todas las queries incluyen `WHERE colegio_id = :token_colegio_id` y los INSERT incluyen `colegio_id`.
 
 Especificación detallada de pseudocódigo con flujo de funciones para cada endpoint, agrupados por módulo.
 
@@ -39,9 +41,17 @@ URL base: `http://localhost:3000/api/v1`
 
 ### Autenticación
 
-- **Firebase Auth** para autenticación inicial (email + contraseña)
+- **Firebase Auth** para autenticación con Google Sign-In
 - JWT interno para sesiones (expira en 24h)
+- JWT incluye: `sub`, `email`, `role`, `colegio_id`, `is_super_admin`
 - Todos los endpoints (excepto login) requieren header `Authorization: Bearer <token>`
+
+### Multi-Tenant
+
+- Todas las queries filtran por `colegio_id` del token JWT
+- El super_admin (N0) puede ver datos de todos los colegios
+- El admin_colegio (N1) solo puede ver datos de su colegio
+- El DNI de padres es único POR COLEGIO, no global
 
 ### Borrado Lógico
 

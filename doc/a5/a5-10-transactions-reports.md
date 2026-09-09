@@ -1,6 +1,8 @@
-# M10 / F10 — Movimientos y Reportes Financieros
+# M10 / F10 — Movimientos y Reportes Financieros (Multi-Tenant)
 
-**Entidad:** Transaction
+**Entidad:** Movimiento
+
+> **Multi-Tenant:** Todos los endpoints filtran por `colegio_id` del token JWT.
 
 ---
 
@@ -8,12 +10,12 @@
 
 | # | Método | Endpoint | Descripción | Actores | Caso de Uso |
 |---|--------|----------|-------------|---------|-------------|
-| 1 | GET | `/api/v1/transactions` | Lista movimientos (ingreso/egreso) | N1, N2, N3 | Listar movimientos |
-| 2 | GET | `/api/v1/transactions/:id` | Detalle de movimiento | N1, N2, N3 | Ver detalle de movimiento |
-| 3 | GET | `/api/v1/transactions/balance` | Balance general (totales ingreso vs egreso) | N1, N2, N3 | Ver balance general |
-| 4 | GET | `/api/v1/reports/financial` | Genera reporte financiero (parámetros: rango de fechas, tipo) | N1, N2, N3 | Generar reporte financiero |
-| 5 | GET | `/api/v1/reports/financial/export?format=pdf` | Exporta reporte a PDF | N1, N2, N3 | Exportar reporte a PDF |
-| 6 | GET | `/api/v1/reports/financial/export?format=csv` | Exporta reporte a CSV | N1, N2, N3 | Exportar reporte a CSV |
+| 1 | GET | `/api/v1/transactions` | Lista movimientos DEL COLEGIO | N0, N1, N2, N3 | Listar movimientos |
+| 2 | GET | `/api/v1/transactions/:id` | Detalle de movimiento DEL COLEGIO | N0, N1, N2, N3 | Ver detalle de movimiento |
+| 3 | GET | `/api/v1/transactions/balance` | Balance general DEL COLEGIO | N0, N1, N2, N3 | Ver balance general |
+| 4 | GET | `/api/v1/reports/financial` | Genera reporte DEL COLEGIO | N0, N1, N2, N3 | Generar reporte financiero |
+| 5 | GET | `/api/v1/reports/financial/export?format=pdf` | Exporta reporte DEL COLEGIO a PDF | N0, N1, N2, N3 | Exportar reporte a PDF |
+| 6 | GET | `/api/v1/reports/financial/export?format=csv` | Exporta reporte DEL COLEGIO a CSV | N0, N1, N2, N3 | Exportar reporte a CSV |
 
 ---
 
@@ -42,11 +44,11 @@
 
 ## Casos de Uso (de A4)
 
-| Caso de Uso | N1 | N2 | N3 | N4 | N5 | N6 |
-|-------------|:--:|:--:|:--:|:--:|:--:|:--:|
-| Listar movimientos | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Ver detalle de movimiento | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Ver balance general | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Generar reporte financiero | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Exportar reporte a PDF | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Exportar reporte a CSV | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Caso de Uso | N0 | N1 | N2 | N3 | N4 | N5 | N6 |
+|-------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Listar movimientos | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Ver detalle de movimiento | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Ver balance general | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Generar reporte financiero | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Exportar reporte a PDF | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Exportar reporte a CSV | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |

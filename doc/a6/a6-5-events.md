@@ -1,4 +1,6 @@
-# A6 M5 — Eventos
+# A6 M5 — Eventos (Multi-Tenant)
+
+> **Multi-Tenant:** Todas las queries incluyen `WHERE colegio_id = :token_colegio_id` y los INSERT incluyen `colegio_id`.
 
 **#1 — GET /events** — Listar eventos — Retorna: Datos
 
@@ -6,7 +8,7 @@
 listarEventos {
   parsearPaginacion();       // page=1, limit=20 por defecto
   parsearFiltros();          // dateFrom y dateTo opcionales (YYYY-MM-DD)
-  construirConsulta();       // SELECT * FROM evento WHERE deleted_at IS NULL
+  construirConsulta();       // SELECT * FROM evento WHERE deleted_at IS NULL AND colegio_id = :token_colegio_id
                              // Si dateFrom: AND date >= ?
                              // Si dateTo: AND date <= ?
                              // ORDER BY date DESC
@@ -19,8 +21,8 @@ listarEventos {
 
 ```
 detalleEvento {
-  RD.eventoExiste();         // el evento existe en la base de datos
-  buscarEvento();            // SELECT * FROM evento WHERE id = ? AND deleted_at IS NULL
+  RD.eventoExiste();         // el evento existe en la base de datos Y PERTENECE AL COLEGIO
+  buscarEvento();            // SELECT * FROM evento WHERE id = ? AND deleted_at IS NULL AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna { id, assembly_id, title, date, description, generates_fine,
                              //   fine_amount, generates_attendance, generates_expense,
                              //   generates_contribution, contribution_amount, created_at }
@@ -36,8 +38,8 @@ nuevoEvento {
                              // si generates_contribution=true, contribution_amount debe ser > 0
   insertarEvento();          // INSERT INTO evento (assembly_id, title, date, description, generates_fine,
                              //   fine_amount, generates_attendance, generates_expense, generates_contribution,
-                             //   contribution_amount, created_at, updated_at)
-                             // VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                             //   contribution_amount, colegio_id, created_at, updated_at)
+                             // VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, :token_colegio_id, NOW(), NOW())
   retornarDatos();           // retorna evento con id y created_at
 }
 ```
@@ -46,14 +48,14 @@ nuevoEvento {
 
 ```
 actualizarEvento {
-  RD.eventoExiste();         // el evento existe en la base de datos
+  RD.eventoExiste();         // el evento existe en la base de datos Y PERTENECE AL COLEGIO
   validarCambios();          // solo actualiza campos presentes (patch parcial)
   actualizarCampos();        // UPDATE evento SET title=COALESCE(?,title), date=COALESCE(?,date),
                              //   description=COALESCE(?,description), generates_fine=COALESCE(?,generates_fine),
                              //   fine_amount=COALESCE(?,fine_amount), generates_attendance=COALESCE(?,generates_attendance),
                              //   generates_expense=COALESCE(?,generates_expense), generates_contribution=COALESCE(?,generates_contribution),
                              //   contribution_amount=COALESCE(?,contribution_amount), updated_at=NOW()
-                             //   WHERE id = ?
+                             //   WHERE id = ? AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna evento actualizado
 }
 ```
@@ -62,9 +64,9 @@ actualizarEvento {
 
 ```
 eliminarEvento {
-  RD.adminOnly();            // solo administradores (N1)
-  RD.eventoExiste();         // el evento existe en la base de datos
-  borrarLogicoCascada();     // UPDATE evento SET deleted_at = NOW() WHERE id = ?
+  RD.adminOnly();            // solo administradores (N0, N1)
+  RD.eventoExiste();         // el evento existe en la base de datos Y PERTENECE AL COLEGIO
+  borrarLogicoCascada();     // UPDATE evento SET deleted_at = NOW() WHERE id = ? AND colegio_id = :token_colegio_id
                              // UPDATE asistencia SET deleted_at = NOW() WHERE event_id = ?
                              // UPDATE multa SET deleted_at = NOW() WHERE event_id = ?
   retornarMensaje();         // retorna "Evento eliminado exitosamente"

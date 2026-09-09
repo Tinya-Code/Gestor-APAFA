@@ -1,4 +1,6 @@
-# A6 M11 — Avisos
+# A6 M11 — Avisos (Multi-Tenant)
+
+> **Multi-Tenant:** Todas las queries incluyen `WHERE colegio_id = :token_colegio_id`.
 
 **#1 — GET /notices** — Listar avisos — Retorna: Datos
 
@@ -6,7 +8,7 @@
 listarAvisos {
   parsearPaginacion();       // page=1, limit=20 por defecto
   parsearFiltros();          // type (event, fine) opcional
-  construirConsulta();       // SELECT * FROM aviso WHERE deleted_at IS NULL
+  construirConsulta();       // SELECT * FROM aviso WHERE deleted_at IS NULL AND colegio_id = :token_colegio_id
                              // Si type: AND type = ?
                              // ORDER BY date DESC
   ejecutarPaginado();        // ejecuta con LIMIT/OFFSET, cuenta total
@@ -18,8 +20,8 @@ listarAvisos {
 
 ```
 detalleAviso {
-  RD.avisoExiste();          // el aviso existe en la base de datos
-  buscarAviso();             // SELECT * FROM aviso WHERE id = ? AND deleted_at IS NULL
+  RD.avisoExiste();          // el aviso existe en la base de datos Y PERTENECE AL COLEGIO
+  buscarAviso();             // SELECT * FROM aviso WHERE id = ? AND deleted_at IS NULL AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna { id, type, reference_id, title, message, date, read, created_at }
 }
 ```

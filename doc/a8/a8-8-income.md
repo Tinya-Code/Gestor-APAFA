@@ -1,4 +1,6 @@
-# A8 M8 — Request/Response — Ingresos
+# A8 M8 — Request/Response — Ingresos (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 ### GET `/api/v1/income`
 

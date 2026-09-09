@@ -1,4 +1,6 @@
-# A6 M9 — Gastos
+# A6 M9 — Gastos (Multi-Tenant)
+
+> **Multi-Tenant:** Todas las queries incluyen `WHERE colegio_id = :token_colegio_id` y los INSERT incluyen `colegio_id`.
 
 ## Gastos
 
@@ -12,7 +14,7 @@ listarGastos {
                              // FROM gasto g
                              // LEFT JOIN evento e ON e.id = g.event_id
                              // LEFT JOIN comprobante c ON c.id = g.receipt_id
-                             // WHERE g.deleted_at IS NULL
+                             // WHERE g.deleted_at IS NULL AND g.colegio_id = :token_colegio_id
                              // Si type: AND g.type = ?
                              // Si dateFrom: AND g.date >= ?
                              // Si dateTo: AND g.date <= ?
@@ -26,8 +28,8 @@ listarGastos {
 
 ```
 detalleGasto {
-  RD.gastoExiste();          // el gasto existe en la base de datos
-  buscarGasto();             // SELECT * FROM gasto WHERE id = ? AND deleted_at IS NULL
+  RD.gastoExiste();          // el gasto existe en la base de datos Y PERTENECE AL COLEGIO
+  buscarGasto();             // SELECT * FROM gasto WHERE id = ? AND deleted_at IS NULL AND colegio_id = :token_colegio_id
   buscarComprobante();       // SELECT * FROM comprobante WHERE id = ?
   buscarItems();             // SELECT * FROM item_gasto WHERE receipt_id = ?
   retornarDatos();           // retorna { id, event_title, receipt: {...}, items: [...], total, type, date, description }
@@ -39,11 +41,11 @@ detalleGasto {
 ```
 nuevoGasto {
   RD.nuevoGasto();           // receipt_id, total, type, date son obligatorios; total > 0
-  RD.comprobanteExiste();    // el comprobante debe existir
-  insertarGasto();           // INSERT INTO gasto (event_id, receipt_id, board_member_id, total, type, date, description, created_at, updated_at)
-                             // VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-  crearMovimiento();         // INSERT INTO movimiento (type, amount, date, description, reference_id, reference_type, created_at, updated_at)
-                             // VALUES ('egreso', ?, ?, ?, ?, 'gasto', NOW(), NOW())
+  RD.comprobanteExiste();    // el comprobante debe existir Y PERTENECE AL COLEGIO
+  insertarGasto();           // INSERT INTO gasto (event_id, receipt_id, board_member_id, total, type, date, description, colegio_id, created_at, updated_at)
+                             // VALUES (?, ?, ?, ?, ?, ?, ?, :token_colegio_id, NOW(), NOW())
+  crearMovimiento();         // INSERT INTO movimiento (type, amount, date, description, reference_id, reference_type, colegio_id, created_at, updated_at)
+                             // VALUES ('egreso', ?, ?, ?, ?, 'gasto', :token_colegio_id, NOW(), NOW())
   retornarDatos();           // retorna gasto con id y created_at
 }
 ```
@@ -52,11 +54,11 @@ nuevoGasto {
 
 ```
 actualizarGasto {
-  RD.gastoExiste();          // el gasto existe en la base de datos
+  RD.gastoExiste();          // el gasto existe en la base de datos Y PERTENECE AL COLEGIO
   validarCambios();          // solo actualiza campos presentes (patch parcial)
   actualizarCampos();        // UPDATE gasto SET total=COALESCE(?,total), type=COALESCE(?,type),
                              //   date=COALESCE(?,date), description=COALESCE(?,description), updated_at=NOW()
-                             //   WHERE id = ?
+                             //   WHERE id = ? AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna gasto actualizado
 }
 ```
@@ -65,9 +67,9 @@ actualizarGasto {
 
 ```
 eliminarGasto {
-  RD.adminOnly();            // solo administradores (N1)
-  RD.gastoExiste();          // el gasto existe en la base de datos
-  borrarLogicoCascada();     // UPDATE gasto SET deleted_at = NOW() WHERE id = ?
+  RD.adminOnly();            // solo administradores (N0, N1)
+  RD.gastoExiste();          // el gasto existe en la base de datos Y PERTENECE AL COLEGIO
+  borrarLogicoCascada();     // UPDATE gasto SET deleted_at = NOW() WHERE id = ? AND colegio_id = :token_colegio_id
                              // UPDATE movimiento SET deleted_at = NOW() WHERE reference_id = ? AND reference_type = 'gasto'
   retornarMensaje();         // retorna "Gasto eliminado exitosamente"
 }
@@ -80,10 +82,10 @@ eliminarGasto {
 ```
 nuevoComprobante {
   RD.nuevoComprobante();     // board_member_id, receipt_number, type, date son obligatorios
-  RD.directivoExiste();      // el directivo debe existir
-  RD.numeroUnico();          // receipt_number debe ser único entre comprobantes activos
-  insertarComprobante();     // INSERT INTO comprobante (board_member_id, receipt_number, type, date, description, created_at, updated_at)
-                             // VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+  RD.directivoExiste();      // el directivo debe existir Y PERTENECE AL COLEGIO
+  RD.numeroUnico();          // receipt_number debe ser único POR COLEGIO
+  insertarComprobante();     // INSERT INTO comprobante (board_member_id, receipt_number, type, date, description, colegio_id, created_at, updated_at)
+                             // VALUES (?, ?, ?, ?, ?, :token_colegio_id, NOW(), NOW())
   retornarDatos();           // retorna comprobante con id
 }
 ```
@@ -92,11 +94,12 @@ nuevoComprobante {
 
 ```
 actualizarComprobante {
-  RD.comprobanteExiste();    // el comprobante existe en la base de datos
+  RD.comprobanteExiste();    // el comprobante existe en la base de datos Y PERTENECE AL COLEGIO
   validarCambios();          // solo actualiza campos presentes (patch parcial)
   actualizarCampos();        // UPDATE comprobante SET receipt_number=COALESCE(?,receipt_number),
                              //   type=COALESCE(?,type), date=COALESCE(?,date),
-                             //   description=COALESCE(?,description), updated_at=NOW() WHERE id = ?
+                             //   description=COALESCE(?,description), updated_at=NOW()
+                             //   WHERE id = ? AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna comprobante actualizado
 }
 ```
@@ -105,9 +108,9 @@ actualizarComprobante {
 
 ```
 eliminarComprobante {
-  RD.adminOnly();            // solo administradores (N1)
-  RD.comprobanteExiste();    // el comprobante existe en la base de datos
-  borrarLogicoCascada();     // UPDATE comprobante SET deleted_at = NOW() WHERE id = ?
+  RD.adminOnly();            // solo administradores (N0, N1)
+  RD.comprobanteExiste();    // el comprobante existe en la base de datos Y PERTENECE AL COLEGIO
+  borrarLogicoCascada();     // UPDATE comprobante SET deleted_at = NOW() WHERE id = ? AND colegio_id = :token_colegio_id
                              // UPDATE item_gasto SET deleted_at = NOW() WHERE receipt_id = ?
   retornarMensaje();         // retorna "Comprobante eliminado exitosamente"
 }
@@ -119,7 +122,7 @@ eliminarComprobante {
 
 ```
 nuevoItem {
-  RD.comprobanteExiste();    // el comprobante debe existir
+  RD.comprobanteExiste();    // el comprobante debe existir Y PERTENECE AL COLEGIO
   RD.nuevoItem();            // description y amount son obligatorios; amount > 0
   insertarItem();            // INSERT INTO item_gasto (receipt_id, description, amount, created_at, updated_at)
                              // VALUES (?, ?, ?, NOW(), NOW())
@@ -131,7 +134,7 @@ nuevoItem {
 
 ```
 actualizarItem {
-  RD.itemExiste();           // el item debe existir y pertenecer al comprobante
+  RD.itemExiste();           // el item debe existir y pertenecer al comprobante Y AL COLEGIO
   actualizarCampos();        // UPDATE item_gasto SET description=COALESCE(?,description),
                              //   amount=COALESCE(?,amount), updated_at=NOW() WHERE id = ?
   retornarDatos();           // retorna item actualizado
@@ -142,8 +145,8 @@ actualizarItem {
 
 ```
 eliminarItem {
-  RD.adminOnly();            // solo administradores (N1)
-  RD.itemExiste();           // el item debe existir y pertenecer al comprobante
+  RD.adminOnly();            // solo administradores (N0, N1)
+  RD.itemExiste();           // el item debe existir y pertenecer al comprobante Y AL COLEGIO
   borrarLogico();            // UPDATE item_gasto SET deleted_at = NOW() WHERE id = ?
   retornarMensaje();         // retorna "Item de gasto eliminado exitosamente"
 }

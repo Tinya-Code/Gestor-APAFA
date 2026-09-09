@@ -1,4 +1,6 @@
-# A7 M9 — DTOs — Gastos
+# A7 M9 — DTOs — Gastos (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT.
 
 ## Gastos
 
@@ -7,7 +9,8 @@
 **Reglas de dominio**
 
 - Filtros: type, date range
-- Solo directivos (N1, N2, N3)
+- Solo directivos (N0, N1, N2, N3)
+- Solo retorna gastos DEL COLEGIO
 
 ```ts
 // Entrada
@@ -149,7 +152,7 @@ interface ActualizarGastoDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N1)
+- Solo administradores (N0, N1)
 - Borra lógicamente gasto + movimiento asociado
 
 ```ts
@@ -172,7 +175,7 @@ interface EliminarGastoResponse {
 **Reglas de dominio**
 
 - board_member_id, receipt_number, type y date son obligatorios
-- receipt_number debe ser único entre comprobantes activos
+- receipt_number debe ser único POR COLEGIO
 
 ```ts
 // Entrada
@@ -224,7 +227,7 @@ interface ActualizarComprobanteDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N1)
+- Solo administradores (N0, N1)
 - Borra lógicamente comprobante + items (CASCADE)
 
 ```ts
@@ -246,7 +249,7 @@ interface EliminarComprobanteResponse {
 
 **Reglas de dominio**
 
-- El comprobante debe existir
+- El comprobante debe existir Y PERTENECER AL COLEGIO
 - description y amount son obligatorios
 - amount debe ser > 0
 
@@ -275,7 +278,7 @@ interface NuevoItemResponse {
 
 **Reglas de dominio**
 
-- El item debe existir y pertenecer al comprobante
+- El item debe existir y pertenecer al comprobante Y AL COLEGIO
 
 ```ts
 // Entrada
@@ -293,8 +296,8 @@ interface ActualizarItemDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N1)
-- El item debe existir y pertenecer al comprobante
+- Solo administradores (N0, N1)
+- El item debe existir y pertenecer al comprobante Y AL COLEGIO
 
 ```ts
 // Entrada: id de comprobante y id del item (path params)

@@ -1,4 +1,6 @@
-# A6 M4 — Asambleas
+# A6 M4 — Asambleas (Multi-Tenant)
+
+> **Multi-Tenant:** Todas las queries incluyen `WHERE colegio_id = :token_colegio_id` y los INSERT incluyen `colegio_id`.
 
 ## Asambleas
 
@@ -10,7 +12,7 @@ listarAsambleas {
   parsearFiltros();          // dateFrom y dateTo opcionales (YYYY-MM-DD)
   construirConsulta();       // SELECT a.*, COUNT(da.id) as details_count FROM asamblea a
                              // LEFT JOIN detalle_asamblea da ON da.assembly_id = a.id AND da.deleted_at IS NULL
-                             // WHERE a.deleted_at IS NULL
+                             // WHERE a.deleted_at IS NULL AND a.colegio_id = :token_colegio_id
                              // Si dateFrom: AND a.date >= ?
                              // Si dateTo: AND a.date <= ?
                              // GROUP BY a.id ORDER BY a.date DESC
@@ -23,8 +25,8 @@ listarAsambleas {
 
 ```
 detalleAsamblea {
-  RD.asambleaExiste();       // la asamblea existe en la base de datos
-  buscarAsamblea();          // SELECT * FROM asamblea WHERE id = ? AND deleted_at IS NULL
+  RD.asambleaExiste();       // la asamblea existe en la base de datos Y PERTENECE AL COLEGIO
+  buscarAsamblea();          // SELECT * FROM asamblea WHERE id = ? AND deleted_at IS NULL AND colegio_id = :token_colegio_id
   buscarDetalles();          // SELECT * FROM detalle_asamblea WHERE assembly_id = ? AND deleted_at IS NULL
                              // ORDER BY registration_date
   retornarDatos();           // retorna { id, title, date, description, details: [...] }
@@ -36,8 +38,8 @@ detalleAsamblea {
 ```
 nuevaAsamblea {
   RD.nuevaAsamblea();        // title y date son obligatorios; formato YYYY-MM-DD
-  insertarAsamblea();        // INSERT INTO asamblea (title, date, description, created_at, updated_at)
-                             // VALUES (?, ?, ?, NOW(), NOW())
+  insertarAsamblea();        // INSERT INTO asamblea (title, date, description, colegio_id, created_at, updated_at)
+                             // VALUES (?, ?, ?, :token_colegio_id, NOW(), NOW())
   retornarDatos();           // retorna { id, title, date, description, created_at }
 }
 ```
@@ -46,10 +48,11 @@ nuevaAsamblea {
 
 ```
 actualizarAsamblea {
-  RD.asambleaExiste();       // la asamblea existe en la base de datos
+  RD.asambleaExiste();       // la asamblea existe en la base de datos Y PERTENECE AL COLEGIO
   validarCambios();          // solo actualiza campos presentes (patch parcial)
   actualizarCampos();        // UPDATE asamblea SET title=COALESCE(?,title), date=COALESCE(?,date),
-                             //   description=COALESCE(?,description), updated_at=NOW() WHERE id = ?
+                             //   description=COALESCE(?,description), updated_at=NOW()
+                             //   WHERE id = ? AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna asamblea actualizada
 }
 ```
@@ -58,9 +61,9 @@ actualizarAsamblea {
 
 ```
 eliminarAsamblea {
-  RD.adminOnly();            // solo administradores (N1)
-  RD.asambleaExiste();       // la asamblea existe en la base de datos
-  borrarLogicoCascada();     // UPDATE asamblea SET deleted_at = NOW() WHERE id = ?
+  RD.adminOnly();            // solo administradores (N0, N1)
+  RD.asambleaExiste();       // la asamblea existe en la base de datos Y PERTENECE AL COLEGIO
+  borrarLogicoCascada();     // UPDATE asamblea SET deleted_at = NOW() WHERE id = ? AND colegio_id = :token_colegio_id
                              // UPDATE detalle_asamblea SET deleted_at = NOW() WHERE assembly_id = ?
   retornarMensaje();         // retorna "Asamblea eliminada exitosamente"
 }
@@ -72,7 +75,7 @@ eliminarAsamblea {
 
 ```
 nuevoDetalle {
-  RD.asambleaExiste();       // la asamblea debe existir
+  RD.asambleaExiste();       // la asamblea debe existir Y PERTENECE AL COLEGIO
   RD.nuevoDetalle();         // description es obligatorio
   insertarDetalle();         // INSERT INTO detalle_asamblea (assembly_id, description, registration_date, image_url, created_at, updated_at)
                              // VALUES (?, ?, CURDATE(), ?, NOW(), NOW())
@@ -85,7 +88,7 @@ nuevoDetalle {
 
 ```
 actualizarDetalle {
-  RD.asambleaExiste();       // la asamblea debe existir
+  RD.asambleaExiste();       // la asamblea debe existir Y PERTENECE AL COLEGIO
   RD.detalleExiste();        // el detalle debe existir y pertenecer a la asamblea
   actualizarCampos();        // UPDATE detalle_asamblea SET description=COALESCE(?,description),
                              //   image_url=COALESCE(?,image_url), updated_at=NOW() WHERE id = ?
@@ -97,8 +100,8 @@ actualizarDetalle {
 
 ```
 eliminarDetalle {
-  RD.adminODirectivo();      // solo administradores (N1) o directivos
-  RD.asambleaExiste();       // la asamblea debe existir
+  RD.adminODirectivo();      // solo administradores (N0, N1) o directivos
+  RD.asambleaExiste();       // la asamblea debe existir Y PERTENECE AL COLEGIO
   RD.detalleExiste();        // el detalle debe existir y pertenecer a la asamblea
   borrarLogico();            // UPDATE detalle_asamblea SET deleted_at = NOW() WHERE id = ?
   retornarMensaje();         // retorna "Detalle de asamblea eliminado exitosamente"

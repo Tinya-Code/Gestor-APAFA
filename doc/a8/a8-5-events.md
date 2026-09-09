@@ -1,4 +1,6 @@
-# A8 M5 — Request/Response — Eventos
+# A8 M5 — Request/Response — Eventos (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 ### GET `/api/v1/events`
 

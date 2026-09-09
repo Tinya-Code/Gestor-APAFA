@@ -6,7 +6,7 @@ NestJS 11 backend for a school parent association management system (APAFA). Fre
 
 ## Stack
 
-- **Backend**: NestJS 11, TypeScript 5.7+, Prisma ORM, MySQL
+- **Backend**: NestJS 11, TypeScript 5.7+, MySQL (mysql2)
 - **Auth**: Firebase Admin SDK → validates tokens → issues internal JWT
 - **Frontend**: Angular (separate project, not in this repo)
 - **Package manager**: pnpm (not npm)
@@ -48,5 +48,5 @@ Modules: M1 (Auth), M2 (Parents/Students), M3 (Board), M4 (Assemblies), M5 (Even
 - **Decorators**: `emitDecoratorMetadata` + `experimentalDecorators` required for NestJS
 - **Module resolution**: `nodenext` (not `node`)
 - **Tests**: Jest 30, `ts-jest`, files as `*.spec.ts` in `src/`, e2e in `test/`
-- **Soft deletes**: `deleted_at` column on all domain tables, auto-filtered by Prisma middleware
+- **Soft deletes**: `deleted_at` column on all domain tables, auto-filtered in queries
 - **API prefix**: `/api/v1` (set in `main.ts`)

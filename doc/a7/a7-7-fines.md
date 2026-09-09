@@ -1,4 +1,6 @@
-# A7 M7 — DTOs — Multas
+# A7 M7 — DTOs — Multas (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT.
 
 **#1 — GET /fines** — Listar multas — Retorna: Datos
 
@@ -6,6 +8,7 @@
 
 - Filtros opcionales: parent_id, event_id, paid
 - Incluye nombre del padre y título del evento
+- Solo retorna multas DEL COLEGIO
 
 ```ts
 // Entrada
@@ -164,7 +167,7 @@ interface ActualizarMultaDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N1)
+- Solo administradores (N0, N1)
 - Borrado lógico
 
 ```ts
@@ -186,6 +189,7 @@ interface EliminarMultaResponse {
 
 - Retorna resumen de multas: totales, pagadas, pendientes
 - Incluye lista de multas individuales
+- Solo retorna multas DEL COLEGIO
 
 ```ts
 // Entrada: id del padre (path param)

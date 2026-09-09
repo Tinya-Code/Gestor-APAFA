@@ -1,4 +1,6 @@
-# A6 M10 — Movimientos y Reportes Financieros
+# A6 M10 — Movimientos y Reportes Financieros (Multi-Tenant)
+
+> **Multi-Tenant:** Todas las queries incluyen `WHERE colegio_id = :token_colegio_id` y los INSERT incluyen `colegio_id`.
 
 ## Movimientos
 
@@ -8,7 +10,7 @@
 listarMovimientos {
   parsearPaginacion();       // page=1, limit=20 por defecto
   parsearFiltros();          // type (ingreso, egreso), dateFrom, dateTo opcionales
-  construirConsulta();       // SELECT * FROM movimiento WHERE 1=1
+  construirConsulta();       // SELECT * FROM movimiento WHERE colegio_id = :token_colegio_id
                              // Si type: AND type = ?
                              // Si dateFrom: AND date >= ?
                              // Si dateTo: AND date <= ?
@@ -22,8 +24,8 @@ listarMovimientos {
 
 ```
 detalleMovimiento {
-  RD.movimientoExiste();     // el movimiento existe en la base de datos
-  buscarMovimiento();        // SELECT * FROM movimiento WHERE id = ?
+  RD.movimientoExiste();     // el movimiento existe en la base de datos Y PERTENECE AL COLEGIO
+  buscarMovimiento();        // SELECT * FROM movimiento WHERE id = ? AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna { id, type, amount, date, description, reference_id, reference_type, created_at }
 }
 ```
@@ -32,9 +34,9 @@ detalleMovimiento {
 
 ```
 balanceGeneral {
-  calcularTotalIngresos();   // SELECT COALESCE(SUM(amount), 0) FROM movimiento WHERE type = 'ingreso'
-  calcularTotalEgresos();    // SELECT COALESCE(SUM(amount), 0) FROM movimiento WHERE type = 'egreso'
-  contarPorTipo();           // SELECT type, COUNT(*) FROM movimiento GROUP BY type
+  calcularTotalIngresos();   // SELECT COALESCE(SUM(amount), 0) FROM movimiento WHERE type = 'ingreso' AND colegio_id = :token_colegio_id
+  calcularTotalEgresos();    // SELECT COALESCE(SUM(amount), 0) FROM movimiento WHERE type = 'egreso' AND colegio_id = :token_colegio_id
+  contarPorTipo();           // SELECT type, COUNT(*) FROM movimiento WHERE colegio_id = :token_colegio_id GROUP BY type
   calcularBalance();         // balance = totalIncome - totalExpense
   retornarDatos();           // retorna { total_income, total_expense, balance, income_count, expense_count, last_updated }
 }
@@ -48,7 +50,7 @@ balanceGeneral {
 generarReporte {
   RD.fechasValidas();        // formato YYYY-MM-DD, dateFrom <= dateTo, rango max 365 días
   consultarMovimientos();    // SELECT * FROM movimiento
-                             // WHERE date BETWEEN ? AND ?
+                             // WHERE date BETWEEN ? AND ? AND colegio_id = :token_colegio_id
                              // Si type: AND type = ?
                              // ORDER BY date
   agruparPorCategoria();     // agrupa ingresos por type: donation, fine, contribution, fee

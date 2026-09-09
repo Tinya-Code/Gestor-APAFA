@@ -1,11 +1,14 @@
-# A7 M8 — DTOs — Ingresos
+# A7 M8 — DTOs — Ingresos (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT.
 
 **#1 — GET /income** — Listar ingresos — Retorna: Datos
 
 **Reglas de dominio**
 
 - Filtros: type (donation, fine, contribution, fee), date range, parent_id
-- Solo directivos (N1, N2, N3)
+- Solo directivos (N0, N1, N2, N3)
+- Solo retorna ingresos DEL COLEGIO
 
 ```ts
 // Entrada
@@ -145,7 +148,7 @@ interface ActualizarIngresoDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N1)
+- Solo administradores (N0, N1)
 - Borra lógicamente ingreso + movimiento asociado
 
 ```ts
@@ -166,6 +169,7 @@ interface EliminarIngresoResponse {
 **Reglas de dominio**
 
 - Historial de ingresos de un padre ordenado por fecha descendente
+- Solo retorna ingresos DEL COLEGIO
 
 ```ts
 // Entrada
@@ -202,7 +206,8 @@ interface HistorialIngresosResponse {
 **Reglas de dominio**
 
 - Retorna totales: recaudado, pendiente, desglose por tipo y por mes
-- Solo directivos
+- Solo directivos (N0, N1, N2, N3)
+- Solo retorna totales DEL COLEGIO
 
 ```ts
 // Entrada: Ninguna
@@ -236,6 +241,7 @@ interface PanelTotalesResponse {
 **Reglas de dominio**
 
 - Estado financiero combinado: ingresos totales + multas (pagadas/pendientes) + balance
+- Solo retorna datos DEL COLEGIO
 
 ```ts
 // Entrada: id del padre (path param)

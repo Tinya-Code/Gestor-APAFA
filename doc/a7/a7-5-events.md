@@ -1,4 +1,6 @@
-# A7 M5 — DTOs — Eventos
+# A7 M5 — DTOs — Eventos (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT.
 
 **#1 — GET /events** — Listar eventos — Retorna: Datos
 
@@ -6,6 +8,7 @@
 
 - Filtros de fecha opcionales
 - Accesible por todos los roles autenticados
+- Solo retorna eventos DEL COLEGIO
 
 ```ts
 // Entrada
@@ -150,7 +153,7 @@ interface ActualizarEventoDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N1)
+- Solo administradores (N0, N1)
 - Borra lógicamente en cascada: evento + asistencias + multas
 
 ```ts

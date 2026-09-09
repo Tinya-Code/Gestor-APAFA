@@ -1,4 +1,6 @@
-# A8 M3 — Request/Response — Directiva
+# A8 M3 — Request/Response — Directiva (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 ### GET `/api/v1/board-members`
 
@@ -18,7 +20,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
       "id": 1,
       "parent_id": 5,
       "parent_name": "Carlos López",
-      "role": "president",
+      "role": "presidente",
       "start_date": "2025-03-01",
       "end_date": null
     }
@@ -56,7 +58,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
       "surname": "López",
       "dni": "28765432"
     },
-    "role": "president",
+    "role": "presidente",
     "start_date": "2025-03-01",
     "end_date": null
   }
@@ -99,7 +101,7 @@ Content-Type: application/json
   "data": {
     "id": 1,
     "parent_id": 5,
-    "role": "president",
+    "role": "presidente",
     "start_date": "2025-03-01",
     "end_date": null,
     "created_at": "2026-01-15T10:30:00Z"
@@ -124,7 +126,7 @@ Content-Type: application/json
 {
   "error": {
     "code": "ROLE_OCCUPIED",
-    "message": "Ya existe un miembro activo con el rol president"
+    "message": "Ya existe un miembro activo con el rol presidente"
   }
 }
 ```

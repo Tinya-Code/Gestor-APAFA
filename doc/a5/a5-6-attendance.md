@@ -1,6 +1,8 @@
-# M6 / F6 — Asistencias
+# M6 / F6 — Asistencias (Multi-Tenant)
 
-**Entidad:** Attendance
+**Entidad:** Asistencia
+
+> **Multi-Tenant:** Todos los endpoints filtran por `colegio_id` del token JWT.
 
 ---
 
@@ -8,9 +10,9 @@
 
 | # | Método | Endpoint | Descripción | Actores | Caso de Uso |
 |---|--------|----------|-------------|---------|-------------|
-| 1 | GET | `/api/v1/events/:id/attendance` | Lista asistencias de un evento | N1–N4 | Listar asistencias por evento |
-| 2 | POST | `/api/v1/events/:id/attendance` | Registra asistencia de un padre a un evento | N1, N2, N4 | Registrar asistencia |
-| 3 | PUT | `/api/v1/events/:id/attendance/:attendanceId` | Edita un registro de asistencia | N1, N2, N4 | Editar asistencia |
+| 1 | GET | `/api/v1/events/:id/attendance` | Lista asistencias de un evento DEL COLEGIO | N0–N4 | Listar asistencias por evento |
+| 2 | POST | `/api/v1/events/:id/attendance` | Registra asistencia EN EL COLEGIO | N0, N1, N2, N4 | Registrar asistencia |
+| 3 | PUT | `/api/v1/events/:id/attendance/:attendanceId` | Edita un registro DEL COLEGIO | N0, N1, N2, N4 | Editar asistencia |
 
 ---
 
@@ -34,8 +36,8 @@
 
 ## Casos de Uso (de A4)
 
-| Caso de Uso | N1 | N2 | N3 | N4 | N5 | N6 |
-|-------------|:--:|:--:|:--:|:--:|:--:|:--:|
-| Listar asistencias por evento | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Registrar asistencia | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| Editar asistencia | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Caso de Uso | N0 | N1 | N2 | N3 | N4 | N5 | N6 |
+|-------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Listar asistencias por evento | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Registrar asistencia | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Editar asistencia | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |

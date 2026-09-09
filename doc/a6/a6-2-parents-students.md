@@ -1,4 +1,6 @@
-# A6 M2 — Padres y Estudiantes
+# A6 M2 — Padres y Estudiantes (Multi-Tenant)
+
+> **Multi-Tenant:** Todas las queries incluyen `WHERE colegio_id = :token_colegio_id` y los INSERT incluyen `colegio_id`.
 
 ## Padres
 
@@ -9,7 +11,7 @@ listarPadres {
   parsearPaginacion();       // page=1, limit=20 por defecto, valida positivos
   construirConsulta();       // SELECT p.*, COUNT(e.id) as students_count FROM padre p
                              // LEFT JOIN estudiante e ON e.parent_id = p.id AND e.deleted_at IS NULL
-                             // WHERE p.deleted_at IS NULL
+                             // WHERE p.deleted_at IS NULL AND p.colegio_id = :token_colegio_id
                              // Si search: AND (p.name LIKE ? OR p.surname LIKE ? OR p.dni LIKE ?)
                              // GROUP BY p.id ORDER BY p.surname, p.name
   ejecutarPaginado();        // ejecuta con LIMIT/OFFSET, cuenta total sin paginación
@@ -21,9 +23,9 @@ listarPadres {
 
 ```
 detallePadre {
-  RD.padreExiste();          // el padre existe en la base de datos y no está borrado
-  buscarPadre();             // SELECT * FROM padre WHERE id = ? AND deleted_at IS NULL
-  buscarEstudiantes();       // SELECT * FROM estudiante WHERE parent_id = ? AND deleted_at IS NULL
+  RD.padreExiste();          // el padre existe en la base de datos y no está borrado Y PERTENECE AL COLEGIO
+  buscarPadre();             // SELECT * FROM padre WHERE id = ? AND deleted_at IS NULL AND colegio_id = :token_colegio_id
+  buscarEstudiantes();       // SELECT * FROM estudiante WHERE parent_id = ? AND deleted_at IS NULL AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna { id, name, surname, dni, phone, email, students: [...] }
 }
 ```
@@ -32,11 +34,11 @@ detallePadre {
 
 ```
 nuevoPadre {
-  RD.nuevoPadre();           // name, surname y dni son obligatorios; dni es único entre activos
-  verificarDuplicado();      // SELECT COUNT(*) FROM padre WHERE dni = ? AND deleted_at IS NULL
-                             // Si ya existe: retorna 422 "DNI ya registrado"
-  insertarPadre();           // INSERT INTO padre (name, surname, dni, phone, email, created_at, updated_at)
-                             // VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+  RD.nuevoPadre();           // name, surname y dni son obligatorios; dni es único POR COLEGIO
+  verificarDuplicado();      // SELECT COUNT(*) FROM padre WHERE dni = ? AND deleted_at IS NULL AND colegio_id = :token_colegio_id
+                             // Si ya existe: retorna 422 "DNI ya registrado en este colegio"
+  insertarPadre();           // INSERT INTO padre (name, surname, dni, phone, email, colegio_id, created_at, updated_at)
+                             // VALUES (?, ?, ?, ?, ?, :token_colegio_id, NOW(), NOW())
   retornarDatos();           // retorna { id, name, surname, dni, phone, email, created_at }
 }
 ```
@@ -45,12 +47,12 @@ nuevoPadre {
 
 ```
 actualizarPadre {
-  RD.padreExiste();          // el padre existe en la base de datos
+  RD.padreExiste();          // el padre existe en la base de datos Y PERTENECE AL COLEGIO
   validarCambios();          // solo actualiza campos presentes (patch parcial)
-  verificarDuplicado();      // si cambia dni, debe ser único (excluye registro actual)
+  verificarDuplicado();      // si cambia dni, debe ser único POR COLEGIO (excluye registro actual)
   actualizarCampos();        // UPDATE padre SET name=COALESCE(?,name), surname=COALESCE(?,surname),
                              //   dni=COALESCE(?,dni), phone=COALESCE(?,phone), email=COALESCE(?,email),
-                             //   updated_at=NOW() WHERE id = ?
+                             //   updated_at=NOW() WHERE id = ? AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna padre actualizado
 }
 ```
@@ -59,10 +61,10 @@ actualizarPadre {
 
 ```
 eliminarPadre {
-  RD.adminOnly();            // solo administradores (N1) pueden eliminar
-  RD.padreExiste();          // el padre existe en la base de datos
-  RD.sinEstudiantes();       // no tiene estudiantes activos vinculados
-  borrarLogico();            // UPDATE padre SET deleted_at = NOW() WHERE id = ?
+  RD.adminOnly();            // solo administradores (N0, N1) pueden eliminar
+  RD.padreExiste();          // el padre existe en la base de datos Y PERTENECE AL COLEGIO
+  RD.sinEstudiantes();       // no tiene estudiantes activos vinculados EN EL COLEGIO
+  borrarLogico();            // UPDATE padre SET deleted_at = NOW() WHERE id = ? AND colegio_id = :token_colegio_id
   retornarMensaje();         // retorna "Padre eliminado exitosamente"
 }
 ```
@@ -77,6 +79,7 @@ listarEstudiantes {
   construirConsulta();       // SELECT s.*, CONCAT(p.name, ' ', p.surname) as parent_name
                              // FROM estudiante s JOIN padre p ON p.id = s.parent_id
                              // WHERE s.deleted_at IS NULL AND p.deleted_at IS NULL
+                             //   AND s.colegio_id = :token_colegio_id
                              // Si grade: AND s.grade = ?
                              // Si section: AND s.section = ?
                              // Si parentId: AND s.parent_id = ?
@@ -90,9 +93,9 @@ listarEstudiantes {
 
 ```
 detalleEstudiante {
-  RD.estudianteExiste();     // el estudiante existe en la base de datos
-  buscarEstudiante();        // SELECT * FROM estudiante WHERE id = ? AND deleted_at IS NULL
-  buscarPadre();             // SELECT id, name, surname FROM padre WHERE id = ?
+  RD.estudianteExiste();     // el estudiante existe en la base de datos Y PERTENECE AL COLEGIO
+  buscarEstudiante();        // SELECT * FROM estudiante WHERE id = ? AND deleted_at IS NULL AND colegio_id = :token_colegio_id
+  buscarPadre();             // SELECT id, name, surname FROM padre WHERE id = ? AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna { id, name, surname, grade, section, parent_id, parent: {...} }
 }
 ```
@@ -102,9 +105,9 @@ detalleEstudiante {
 ```
 nuevoEstudiante {
   RD.nuevoEstudiante();      // name, surname, grade, section, parent_id son obligatorios
-  RD.padreExiste();          // el padre referenciado debe existir y no estar borrado
-  insertarEstudiante();      // INSERT INTO estudiante (name, surname, grade, section, parent_id, created_at, updated_at)
-                             // VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+  RD.padreExiste();          // el padre referenciado debe existir y no estar borrado Y PERTENECE AL COLEGIO
+  insertarEstudiante();      // INSERT INTO estudiante (name, surname, grade, section, parent_id, colegio_id, created_at, updated_at)
+                             // VALUES (?, ?, ?, ?, ?, :token_colegio_id, NOW(), NOW())
   retornarDatos();           // retorna { id, name, surname, grade, section, parent_id, created_at }
 }
 ```
@@ -113,11 +116,11 @@ nuevoEstudiante {
 
 ```
 actualizarEstudiante {
-  RD.estudianteExiste();     // el estudiante existe en la base de datos
+  RD.estudianteExiste();     // el estudiante existe en la base de datos Y PERTENECE AL COLEGIO
   validarCambios();          // solo actualiza campos presentes (patch parcial)
   actualizarCampos();        // UPDATE estudiante SET name=COALESCE(?,name), surname=COALESCE(?,surname),
                              //   grade=COALESCE(?,grade), section=COALESCE(?,section), updated_at=NOW()
-                             //   WHERE id = ?
+                             //   WHERE id = ? AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna estudiante actualizado
 }
 ```
@@ -126,9 +129,9 @@ actualizarEstudiante {
 
 ```
 eliminarEstudiante {
-  RD.adminOnly();            // solo administradores (N1)
-  RD.estudianteExiste();     // el estudiante existe en la base de datos
-  borrarLogico();            // UPDATE estudiante SET deleted_at = NOW() WHERE id = ?
+  RD.adminOnly();            // solo administradores (N0, N1)
+  RD.estudianteExiste();     // el estudiante existe en la base de datos Y PERTENECE AL COLEGIO
+  borrarLogico();            // UPDATE estudiante SET deleted_at = NOW() WHERE id = ? AND colegio_id = :token_colegio_id
   retornarMensaje();         // retorna "Estudiante eliminado exitosamente"
 }
 ```
@@ -137,9 +140,10 @@ eliminarEstudiante {
 
 ```
 reasignarPadre {
-  RD.estudianteExiste();     // el estudiante existe en la base de datos
-  RD.padreExiste();          // el nuevo padre existe en la base de datos
-  actualizarVinculo();       // UPDATE estudiante SET parent_id = ?, updated_at = NOW() WHERE id = ?
+  RD.estudianteExiste();     // el estudiante existe en la base de datos Y PERTENECE AL COLEGIO
+  RD.padreExiste();          // el nuevo padre existe en la base de datos Y PERTENECE AL COLEGIO
+  actualizarVinculo();       // UPDATE estudiante SET parent_id = ?, updated_at = NOW()
+                             // WHERE id = ? AND colegio_id = :token_colegio_id
   retornarDatos();           // retorna estudiante con nueva referencia al padre
 }
 ```

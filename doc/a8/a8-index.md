@@ -1,4 +1,6 @@
-# A8 — Request y Response HTTP
+# A8 — Request y Response HTTP (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 Especificación completa de solicitudes y respuestas HTTP para cada endpoint, incluyendo headers, body JSON de ejemplo y códigos de estado.
 

@@ -1,4 +1,6 @@
-# A8 M6 — Request/Response — Asistencias
+# A8 M6 — Request/Response — Asistencias (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 ### GET `/api/v1/events/:id/attendance`
 

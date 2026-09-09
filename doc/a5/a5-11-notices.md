@@ -1,6 +1,8 @@
-# M11 / F11 — Avisos
+# M11 / F11 — Avisos (Multi-Tenant)
 
-**Entidad:** Notice
+**Entidad:** Aviso
+
+> **Multi-Tenant:** Todos los endpoints filtran por `colegio_id` del token JWT.
 
 ---
 
@@ -8,8 +10,8 @@
 
 | # | Método | Endpoint | Descripción | Actores | Caso de Uso |
 |---|--------|----------|-------------|---------|-------------|
-| 1 | GET | `/api/v1/notices` | Lista avisos (generados desde eventos/multas) | N1–N5 | Listar avisos |
-| 2 | GET | `/api/v1/notices/:id` | Detalle de un aviso | N1–N5 | Ver detalle de aviso |
+| 1 | GET | `/api/v1/notices` | Lista avisos DEL COLEGIO | N0–N5 | Listar avisos |
+| 2 | GET | `/api/v1/notices/:id` | Detalle de un aviso DEL COLEGIO | N0–N5 | Ver detalle de aviso |
 
 > Los avisos no tienen endpoints de escritura expuestos al usuario: se crean internamente cuando M5 (Eventos) o M7 (Multas) disparan una notificación (`type` + `reference_id`).
 
@@ -35,7 +37,7 @@
 
 ## Casos de Uso (de A4)
 
-| Caso de Uso | N1 | N2 | N3 | N4 | N5 | N6 |
-|-------------|:--:|:--:|:--:|:--:|:--:|:--:|
-| Listar avisos | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Ver detalle de aviso | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Caso de Uso | N0 | N1 | N2 | N3 | N4 | N5 | N6 |
+|-------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Listar avisos | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Ver detalle de aviso | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |

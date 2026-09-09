@@ -1,4 +1,6 @@
-# A8 M2 — Request/Response — Padres y Estudiantes
+# A8 M2 — Request/Response — Padres y Estudiantes (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT. El DNI es único POR COLEGIO.
 
 ## Padres
 

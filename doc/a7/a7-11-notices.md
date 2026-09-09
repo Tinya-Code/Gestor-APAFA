@@ -1,4 +1,6 @@
-# A7 M11 — DTOs — Avisos
+# A7 M11 — DTOs — Avisos (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT.
 
 **#1 — GET /notices** — Listar avisos — Retorna: Datos
 
@@ -6,6 +8,7 @@
 
 - Avisos de solo lectura, generados automáticamente
 - Filtro opcional por type (event, fine)
+- Solo retorna avisos DEL COLEGIO
 
 ```ts
 // Entrada

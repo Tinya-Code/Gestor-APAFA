@@ -1,6 +1,8 @@
-# M4 / F4 — Asambleas
+# M4 / F4 — Asambleas (Multi-Tenant)
 
-**Entidades:** Assembly, AssemblyDetail
+**Entidades:** Asamblea, DetalleAsamblea
+
+> **Multi-Tenant:** Todos los endpoints filtran por `colegio_id` del token JWT.
 
 ---
 
@@ -8,14 +10,14 @@
 
 | # | Método | Endpoint | Descripción | Actores | Caso de Uso |
 |---|--------|----------|-------------|---------|-------------|
-| 1 | GET | `/api/v1/assemblies` | Lista asambleas | N1–N4 | Listar asambleas |
-| 2 | GET | `/api/v1/assemblies/:id` | Detalle de asamblea (incluye detalles) | N1–N4 | Ver detalle de asamblea |
-| 3 | POST | `/api/v1/assemblies` | Registra una asamblea | N1, N2 | Registrar asamblea |
-| 4 | PUT | `/api/v1/assemblies/:id` | Edita una asamblea | N1, N2 | Editar asamblea |
-| 5 | DELETE | `/api/v1/assemblies/:id` | Elimina una asamblea | N1 | Eliminar asamblea |
-| 6 | POST | `/api/v1/assemblies/:id/details` | Registra un detalle/acuerdo de asamblea | N1, N2, N4 | Registrar detalle de asamblea |
-| 7 | PUT | `/api/v1/assemblies/:id/details/:detailId` | Edita un detalle de asamblea | N1, N2, N4 | Editar detalle de asamblea |
-| 8 | DELETE | `/api/v1/assemblies/:id/details/:detailId` | Elimina un detalle de asamblea | N1, N2 | Eliminar detalle de asamblea |
+| 1 | GET | `/api/v1/assemblies` | Lista asambleas DEL COLEGIO | N0–N4 | Listar asambleas |
+| 2 | GET | `/api/v1/assemblies/:id` | Detalle de asamblea DEL COLEGIO (incluye detalles) | N0–N4 | Ver detalle de asamblea |
+| 3 | POST | `/api/v1/assemblies` | Registra una asamblea EN EL COLEGIO | N0, N1, N2 | Registrar asamblea |
+| 4 | PUT | `/api/v1/assemblies/:id` | Edita una asamblea DEL COLEGIO | N0, N1, N2 | Editar asamblea |
+| 5 | DELETE | `/api/v1/assemblies/:id` | Elimina una asamblea DEL COLEGIO | N0, N1 | Eliminar asamblea |
+| 6 | POST | `/api/v1/assemblies/:id/details` | Registra un detalle/acuerdo DEL COLEGIO | N0, N1, N2, N4 | Registrar detalle de asamblea |
+| 7 | PUT | `/api/v1/assemblies/:id/details/:detailId` | Edita un detalle DEL COLEGIO | N0, N1, N2, N4 | Editar detalle de asamblea |
+| 8 | DELETE | `/api/v1/assemblies/:id/details/:detailId` | Elimina un detalle DEL COLEGIO | N0, N1, N2 | Eliminar detalle de asamblea |
 
 ---
 
@@ -44,13 +46,13 @@
 
 ## Casos de Uso (de A4)
 
-| Caso de Uso | N1 | N2 | N3 | N4 | N5 | N6 |
-|-------------|:--:|:--:|:--:|:--:|:--:|:--:|
-| Listar asambleas | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Ver detalle de asamblea | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Registrar asamblea | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Editar asamblea | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Eliminar asamblea | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Registrar detalle de asamblea | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| Editar detalle de asamblea | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| Eliminar detalle de asamblea | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Caso de Uso | N0 | N1 | N2 | N3 | N4 | N5 | N6 |
+|-------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Listar asambleas | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Ver detalle de asamblea | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Registrar asamblea | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Editar asamblea | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Eliminar asamblea | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Registrar detalle de asamblea | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Editar detalle de asamblea | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Eliminar detalle de asamblea | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |

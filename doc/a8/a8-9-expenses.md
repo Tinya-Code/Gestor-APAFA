@@ -1,4 +1,6 @@
-# A8 M9 — Request/Response — Gastos
+# A8 M9 — Request/Response — Gastos (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 ### GET `/api/v1/expenses`
 

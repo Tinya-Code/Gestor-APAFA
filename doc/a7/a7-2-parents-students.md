@@ -1,4 +1,6 @@
-# A7 M2 — DTOs — Padres y Estudiantes
+# A7 M2 — DTOs — Padres y Estudiantes (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT. El DNI es único POR COLEGIO.
 
 ## Padres
 
@@ -7,8 +9,8 @@
 **Reglas de dominio**
 
 - Paginación por defecto: page=1, limit=20
-- Búsqueda por nombre, apellido o DNI (case-insensitive LIKE)
-- Solo retorna padres no borrados lógicamente
+- Búsqueda por nombre, apellido o DNI POR COLEGIO (case-insensitive LIKE)
+- Solo retorna padres no borrados lógicamente DEL COLEGIO
 
 ```ts
 // Entrada
@@ -82,7 +84,7 @@ interface PadreDetalleResponse {
 
 **Reglas de dominio**
 
-- DNI debe ser único entre padres activos
+- DNI debe ser único POR COLEGIO entre padres activos
 - name, surname y dni son obligatorios
 - phone y email son opcionales
 
@@ -138,7 +140,7 @@ interface ActualizarPadreDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N1) pueden eliminar
+- Solo administradores (N0, N1) pueden eliminar
 - No se puede eliminar padre con estudiantes activos vinculados
 - Borrado lógico (deleted_at)
 
@@ -286,7 +288,7 @@ interface ActualizarEstudianteDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N1)
+- Solo administradores (N0, N1)
 - Borrado lógico
 
 ```ts
@@ -306,8 +308,8 @@ interface EliminarEstudianteResponse {
 
 **Reglas de dominio**
 
-- Reasigna un estudiante a otro padre
-- Ambos (estudiante y nuevo padre) deben existir
+- Reasigna un estudiante a otro padre DEL COLEGIO
+- Ambos (estudiante y nuevo padre) deben existir Y PERTENECER AL COLEGIO
 
 ```ts
 // Entrada

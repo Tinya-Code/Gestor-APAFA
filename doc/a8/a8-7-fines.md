@@ -1,4 +1,6 @@
-# A8 M7 — Request/Response — Multas
+# A8 M7 — Request/Response — Multas (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
 ### GET `/api/v1/fines`
 

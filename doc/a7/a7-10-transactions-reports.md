@@ -1,4 +1,6 @@
-# A7 M10 — DTOs — Movimientos y Reportes Financieros
+# A7 M10 — DTOs — Movimientos y Reportes Financieros (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT.
 
 ## Movimientos
 
@@ -7,7 +9,8 @@
 **Reglas de dominio**
 
 - Filtros: type (income, expense), date range
-- Solo directivos
+- Solo directivos (N0, N1, N2, N3)
+- Solo retorna movimientos DEL COLEGIO
 
 ```ts
 // Entrada
@@ -76,7 +79,8 @@ interface MovimientoDetalleResponse {
 **Reglas de dominio**
 
 - Balance general: total ingresos vs total egresos
-- Solo directivos
+- Solo directivos (N0, N1, N2, N3)
+- Solo retorna balance DEL COLEGIO
 
 ```ts
 // Entrada: Ninguna

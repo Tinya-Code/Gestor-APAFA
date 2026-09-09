@@ -1,11 +1,13 @@
-# A7 M6 — DTOs — Asistencias
+# A7 M6 — DTOs — Asistencias (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT.
 
 **#1 — GET /events/:id/attendance** — Listar asistencias de un evento — Retorna: Datos
 
 **Reglas de dominio**
 
-- El evento debe existir
-- Lista registros de asistencia con nombre del padre
+- El evento debe existir Y PERTENECER AL COLEGIO
+- Lista registros de asistencia con nombre del padre DEL COLEGIO
 
 ```ts
 // Entrada
@@ -41,8 +43,8 @@ interface ListarAsistenciasResponse {
 
 **Reglas de dominio**
 
-- No puede haber dos registros de asistencia para el mismo padre en el mismo evento
-- El padre y el evento deben existir
+- No puede haber dos registros de asistencia para el mismo padre en el mismo evento POR COLEGIO
+- El padre y el evento deben existir Y PERTENECER AL COLEGIO
 - attended es booleano
 
 ```ts
@@ -71,7 +73,7 @@ interface NuevaAsistenciaResponse {
 
 **Reglas de dominio**
 
-- La asistencia debe existir y pertenecer al evento
+- La asistencia debe existir y pertenecer al evento Y AL COLEGIO
 
 ```ts
 // Entrada

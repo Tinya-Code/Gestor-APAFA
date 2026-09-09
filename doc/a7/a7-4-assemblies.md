@@ -1,4 +1,6 @@
-# A7 M4 — DTOs — Asambleas
+# A7 M4 — DTOs — Asambleas (Multi-Tenant)
+
+> **Multi-Tenant:** Todos los DTOs asumen `colegio_id` del token JWT.
 
 ## Asambleas
 
@@ -8,6 +10,7 @@
 
 - Filtros de fecha opcionales (date_from, date_to)
 - Incluye conteo de detalles registrados
+- Solo retorna asambleas DEL COLEGIO
 
 ```ts
 // Entrada
@@ -122,7 +125,7 @@ interface ActualizarAsambleaDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N1)
+- Solo administradores (N0, N1)
 - Borra lógicamente en cascada: asamblea + detalles
 
 ```ts
@@ -192,8 +195,8 @@ interface ActualizarDetalleDto {
 
 **Reglas de dominio**
 
-- Solo administradores o directivos
-- El detalle debe pertenecer a la asamblea
+- Solo administradores (N0, N1) o directivos
+- El detalle debe pertenecer a la asamblea Y AL COLEGIO
 
 ```ts
 // Entrada: id de asamblea y id del detalle (path params)
