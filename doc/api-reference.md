@@ -207,7 +207,7 @@ Content-Type: application/json
 
 ### GET `/auth/roles`
 
-List available roles for the current school. Only `admin_colegio` can access.
+List available roles for the current school. Only `super_admin` can access.
 
 **Request:**
 ```
@@ -219,7 +219,6 @@ Authorization: Bearer <jwt>
 ```json
 {
   "data": [
-    { "name": "admin_colegio", "description": "Administrador del colegio" },
     { "name": "presidente", "description": "Presidente de la APAFA" },
     { "name": "vicepresidente", "description": "Vicepresidente de la APAFA" },
     { "name": "tesorero", "description": "Tesorero de la APAFA" },
@@ -240,7 +239,7 @@ Authorization: Bearer <jwt>
 
 ### PUT `/auth/roles/:id`
 
-Assign or update a user's role in the current school. Only `admin_colegio` can access.
+Assign or update a user's role in the current school. Only `super_admin` can access.
 
 **Request:**
 ```
@@ -1373,7 +1372,7 @@ Authorization: Bearer <jwt>
 
 ### POST `/directiva/reemplazos`
 
-Crear un reemplazo temporal. Solo presidente o admin_colegio pueden autorizar.
+Crear un reemplazo temporal. Solo presidente o super_admin pueden autorizar.
 
 **Request:**
 ```
@@ -1443,7 +1442,7 @@ Content-Type: application/json
 
 ### PUT `/directiva/reemplazos/:id`
 
-Actualizar un reemplazo (extender fecha, cambiar motivo, desactivar). Solo presidente o admin_colegio.
+Actualizar un reemplazo (extender fecha, cambiar motivo, desactivar). Solo presidente o super_admin.
 
 **Request:**
 ```
@@ -1503,7 +1502,7 @@ Content-Type: application/json
 
 ### DELETE `/directiva/reemplazos/:id`
 
-Finalizar un reemplazo (el vocal vuelve a solo lectura). Solo presidente o admin_colegio.
+Finalizar un reemplazo (el vocal vuelve a solo lectura). Solo presidente o super_admin.
 
 **Request:**
 ```
@@ -1602,7 +1601,6 @@ All domain endpoints automatically filter by `colegio_id` from the JWT:
 ### RolesGuard Behavior
 
 - **Super admin bypass:** `is_super_admin === true` → always allowed
-- **Admin colegio bypass:** `role === 'admin_colegio'` → allowed for all operations in their school
 - **Vocal with active replacement:** When a vocal has an active temporary replacement, their `effective_role` changes to the role they're replacing (e.g., `tesorero`). This is automatic — no logout/login needed.
 - Frontend should still hide/show UI elements based on role for UX
 

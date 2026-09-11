@@ -9,8 +9,11 @@ import type {
   UsuarioRow,
   UsuarioColegioRow,
 } from '../../shared/types/usuario.types';
-import { executePaginatedQuery } from '../../shared/helpers/pagination.helper';
-import type { RowDataPacket, ResultSetHeader } from 'mysql2';
+import {
+  executePaginatedQuery,
+  type PaginatedResult,
+} from '../../shared/helpers/pagination.helper';
+import type { ResultSetHeader } from 'mysql2';
 
 export interface UsuarioEntity {
   id: number;
@@ -44,9 +47,9 @@ export class UsuariosService {
     page = 1,
     limit = 10,
     search?: string,
-  ): Promise<{ data: UsuarioEntity[]; total: number }> {
+  ): Promise<PaginatedResult<UsuarioRow>> {
     const baseWhere = 'WHERE deleted_at IS NULL';
-    const baseParams: (string | number)[] = [];
+    const baseParams: (string | number | boolean)[] = [];
 
     let searchClause = '';
     const searchParams: string[] = [];
@@ -80,7 +83,7 @@ export class UsuariosService {
     );
   }
 
-  async findOne(id: number): Promise<UsuarioEntity> {
+  async findOne(id: number): Promise<UsuarioRow> {
     const rows = await this.db.query<UsuarioRow[]>(
       `SELECT id, email, name, surname, phone, is_super_admin, created_at, updated_at
        FROM usuario
@@ -95,7 +98,7 @@ export class UsuariosService {
     return rows[0];
   }
 
-  async findColegios(usuarioId: number): Promise<UsuarioColegioEntity[]> {
+  async findColegios(usuarioId: number): Promise<UsuarioColegioRow[]> {
     // Verificar que el usuario existe
     await this.findOne(usuarioId);
 
@@ -116,12 +119,12 @@ export class UsuariosService {
     usuarioId: number,
     colegioId: number,
     role: string,
-  ): Promise<UsuarioColegioEntity> {
+  ): Promise<UsuarioColegioRow> {
     // Verificar que el usuario existe
     await this.findOne(usuarioId);
 
     // Verificar que el colegio existe
-    const colegios = await this.db.query<RowDataPacket[]>(
+    const colegios = await this.db.query<UsuarioColegioRow[]>(
       'SELECT id FROM colegio WHERE id = ? AND deleted_at IS NULL',
       [colegioId],
     );
@@ -198,7 +201,7 @@ export class UsuariosService {
     }
 
     // Verificar que no tenga padres asociados
-    const padres = await this.db.query<RowDataPacket[]>(
+    const padres = await this.db.query<UsuarioRow[]>(
       'SELECT id FROM padre WHERE usuario_id = ? AND deleted_at IS NULL',
       [id],
     );

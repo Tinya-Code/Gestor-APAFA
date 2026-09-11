@@ -22,8 +22,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
       "id": 1,
       "title": "Asamblea Anual 2026",
       "date": "2026-03-15",
-      "description": "Revisión anual y aprobación de presupuesto",
-      "details_count": 3
+      "description": "Revisión anual y aprobación de presupuesto"
     }
   ],
   "pagination": {
@@ -50,20 +49,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ```json
 {
-  "data": {
-    "id": 1,
-    "title": "Asamblea Anual 2026",
-    "date": "2026-03-15",
-    "description": "Revisión anual y aprobación de presupuesto",
-    "details": [
-      {
-        "id": 1,
-        "description": "Presupuesto anual aprobado: $50.000",
-        "registration_date": "2026-03-15",
-        "image_url": "https://..."
-      }
-    ]
-  }
+  "id": 1,
+  "title": "Asamblea Anual 2026",
+  "date": "2026-03-15",
+  "description": "Revisión anual y aprobación de presupuesto",
+  "details": [
+    {
+      "id": 1,
+      "description": "Presupuesto anual aprobado: $50.000",
+      "registration_date": "2026-03-15",
+      "image_url": "https://..."
+    }
+  ]
 }
 ```
 
@@ -100,13 +97,11 @@ Content-Type: application/json
 
 ```json
 {
-  "data": {
-    "id": 1,
-    "title": "Asamblea Anual 2026",
-    "date": "2026-03-15",
-    "description": "Revisión anual y aprobación de presupuesto",
-    "created_at": "2026-01-15T10:30:00Z"
-  }
+  "id": 1,
+  "title": "Asamblea Anual 2026",
+  "date": "2026-03-15",
+  "description": "Revisión anual y aprobación de presupuesto",
+  "created_at": "2026-01-15T10:30:00Z"
 }
 ```
 
@@ -167,9 +162,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ```json
 {
-  "data": {
-    "message": "Asamblea eliminada exitosamente"
-  }
+  "message": "Asamblea eliminada exitosamente"
 }
 ```
 
@@ -199,6 +192,7 @@ Content-Type: application/json
 
 {
   "description": "Presupuesto anual aprobado: $50.000",
+  "registration_date": "2026-03-15",
   "image_url": "https://..."
 }
 ```
@@ -207,14 +201,12 @@ Content-Type: application/json
 
 ```json
 {
-  "data": {
-    "id": 1,
-    "assembly_id": 1,
-    "description": "Presupuesto anual aprobado: $50.000",
-    "registration_date": "2026-03-15",
-    "image_url": "https://...",
-    "created_at": "2026-01-15T10:30:00Z"
-  }
+  "id": 1,
+  "assembly_id": 1,
+  "description": "Presupuesto anual aprobado: $50.000",
+  "registration_date": "2026-03-15",
+  "image_url": "https://...",
+  "created_at": "2026-01-15T10:30:00Z"
 }
 ```
 
@@ -275,9 +267,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ```json
 {
-  "data": {
-    "message": "Detalle de asamblea eliminado exitosamente"
-  }
+  "message": "Detalle de asamblea eliminado exitosamente"
 }
 ```
 

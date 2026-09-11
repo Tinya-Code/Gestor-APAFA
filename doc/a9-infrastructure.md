@@ -293,7 +293,7 @@ import { AuthGuard } from '@nestjs/passport';
 export class JwtAuthGuard extends AuthGuard('jwt') {}
 ```
 
-### Roles Guard (con bypass de super admin y admin_colegio)
+### Roles Guard (con bypass de super admin)
 
 ```typescript
 // src/auth/guards/roles.guard.ts
@@ -330,11 +330,6 @@ export class RolesGuard implements CanActivate {
 
     // ✅ SUPER ADMIN BYPASS: tiene acceso TOTAL
     if (user?.is_super_admin === true) {
-      return true;
-    }
-
-    // ✅ ADMIN COLEGIO BYPASS: acceso total EN SU colegio
-    if (user?.role === 'admin_colegio') {
       return true;
     }
 
@@ -378,7 +373,7 @@ export class RolesGuard implements CanActivate {
 }
 ```
 
-> **Nota:** El `admin_colegio` tiene bypass total EN SU colegio. No necesita estar en la lista de `@Roles()` para acceder a endpoints protegidos dentro de su colegio.
+> **Nota:** El super_admin tiene bypass total. No necesita estar en la lista de `@Roles()` para acceder a endpoints protegidos.
 >
 > **Reemplazos Temporales:** Cuando un vocal tiene un reemplazo activo, el RolesGuard usa `effective_role` (el rol que reemplaza) en lugar de `vocal` para la autorización. Esto permite que el vocal acceda a los endpoints del rol que está reemplazando.
 
@@ -403,14 +398,9 @@ export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
  * - Tiene acceso TOTAL a todos los colegios (bypass de RolesGuard).
  * - NUNCA debe aparecer en listados de padres o directiva.
  * - Todas las queries de listado deben excluir: WHERE is_super_admin = 0
- *
- * REGLA: El rol 'admin_colegio' tiene bypass total EN SU colegio.
- * - Accede a todos los endpoints dentro de su colegio.
- * - No necesita estar en la lista de @Roles() para acceder.
  */
 export const ROLES = {
   ADMIN: 'admin', // Super admin (desarrollador)
-  ADMIN_COLEGIO: 'admin_colegio', // Administrador del colegio
   PRESIDENTE: 'presidente',
   VICEPRESIDENTE: 'vicepresidente',
   TESORERO: 'tesorero',
@@ -463,19 +453,19 @@ export const ColegioId = createParamDecorator(
 export class ParentsController {
   
   @Get()
-  @Roles('admin_colegio', 'presidente', 'vicepresidente', 'tesorero', 'secretario', 'vocal')
+  @Roles('presidente', 'vicepresidente', 'tesorero', 'secretario', 'vocal')
   findAll(@ColegioId() colegioId: number) { ... }
 
   @Post()
-  @Roles('admin_colegio', 'presidente', 'vicepresidente')
+  @Roles('presidente', 'vicepresidente')
   create(@Body() dto: CreateParentDto, @ColegioId() colegioId: number) { ... }
 
   @Put(':id')
-  @Roles('admin_colegio', 'presidente', 'vicepresidente')
+  @Roles('presidente', 'vicepresidente')
   update(@Param('id') id: number, @Body() dto: UpdateParentDto, @ColegioId() colegioId: number) { ... }
 
   @Delete(':id')
-  @Roles('admin_colegio', 'presidente')
+  @Roles('presidente')
   remove(@Param('id') id: number, @ColegioId() colegioId: number) { ... }
 }
 ```
@@ -501,7 +491,6 @@ export class ParentsController {
 │  ┌────────────────────────────────────────────────┐              │
 │  │ CAPA 2: RolesGuard                             │              │
 │  │ → ¿Es super_admin? → BYPASS TOTAL → ✅ Pasa    │              │
-│  │ → ¿Es admin_colegio? → BYPASS COLEGIO → ✅ Pasa│              │
 │  │ → ¿Tiene el rol requerido? → ✅ Pasa           │              │
 │  │ → No tiene el rol → 403 FORBIDDEN               │              │
 │  └────────────────────────────────────────────────┘              │
@@ -524,7 +513,6 @@ export class ParentsController {
 | Token válido, rol incorrecto | ✅ | ❌ | **403** Permisos insuficientes |
 | Token válido, rol correcto | ✅ | ✅ | **200 OK** |
 | Token de super_admin | ✅ | ✅ (bypass total) | **200 OK** |
-| Token de admin_colegio | ✅ | ✅ (bypass colegio) | **200 OK** |
 
 **Conclusión:** Sin un JWT interno válido y con el rol adecuado, no se puede hacer NADA en el backend. Ni Postman, ni curl, ni ningún otro cliente puede evadir estas dos capas de seguridad.
 
@@ -886,7 +874,6 @@ export class AuthService {
 
   listRoles(): { name: string; description: string }[] {
     return [
-      { name: 'admin_colegio', description: 'Administrador del colegio' },
       { name: 'presidente', description: 'Presidente de la APAFA' },
       { name: 'vicepresidente', description: 'Vicepresidente de la APAFA' },
       { name: 'tesorero', description: 'Tesorero de la APAFA' },

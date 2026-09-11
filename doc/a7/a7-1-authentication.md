@@ -146,10 +146,9 @@ interface SwitchColegioResponse {
 
 **Reglas de dominio**
 
-- Solo N0 (super_admin) o N1 (admin_colegio) pueden asignar roles
+- Solo super_admin puede asignar roles
 - El super_admin puede asignar en cualquier colegio
-- El admin_colegio solo puede asignar EN SU colegio
-- El rol debe ser válido: admin_colegio, presidente, vicepresidente, tesorero, secretario, vocal, padre
+- El rol debe ser válido: presidente, vicepresidente, tesorero, secretario, vocal, padre
 
 ```ts
 // Entrada

@@ -2,6 +2,8 @@
 
 > **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
+> **Super Admin:** Las asistencias están anidadas bajo un evento específico (`/events/:id/attendance`). El super_admin puede acceder a eventos de cualquier colegio, pero no necesita el query param `colegio_id` aquí porque el evento ya pertenece a un colegio.
+
 ### GET `/api/v1/events/:id/attendance`
 
 #### Request

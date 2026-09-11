@@ -1,94 +1,282 @@
 # M4 — T4: Controlador REST
 
 **Módulo:** Asambleas
-**Archivos a crear:** `src/modules/assemblies/assemblies.controller.ts`
-**Documentos a revisar:** `src/modules/directiva/directiva.controller.ts` (patrón de controlador), `src/auth/guards/roles.guard.ts` (cómo funcionan los roles), `doc/a5/a5-4-assemblies.md` (endpoints definidos)
+**Archivo a crear:** `src/modules/assemblies/assemblies.controller.ts`
+**Referencia:** `src/modules/directiva/directiva.controller.ts` (patrón de controlador)
+
+> **⚠️ NOTA:** El archivo `directiva.controller.ts` aún contiene `@Roles('admin_colegio', ...)` en su código actual. Este task describe el estado CORREGIDO sin `admin_colegio`. Usa el patrón de estructura de directiva.controller.ts pero con roles actualizados según `doc/a3-actores-permisos.md`.
+
+---
+
+## Contexto general
+
+El controlador define los endpoints HTTP, recibe las peticiones, valida con DTOs y delega al servicio. Cada endpoint tiene decoradores de Swagger para documentación automática.
+
+### Convenciones del proyecto
+
+- **Guards:** `@UseGuards(JwtAuthGuard, RolesGuard)` en la CLASE (no en cada método)
+- **Auth:** `@ApiBearerAuth()` en la CLASE
+- **Tags:** `@ApiTags('ModuleName')` en la CLASE
+- **Roles:** `@Roles(...)` en cada MÉTODO (no en la clase)
+- **Colegio:** `@ColegioId()` en cada MÉTODO que necesite el colegio del JWT
+- **Params numéricos:** `@Param('id', ParseIntPipe)` siempre
+- **Status codes:** 200 para GET/PUT/DELETE, 201 para POST
+- **Swagger:** `@ApiOperation` + `@ApiResponse` en cada endpoint
+
+### Imports necesarios
+
+```typescript
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { AssembliesService } from './assemblies.service';
+import { CreateAssemblyDto } from './dto/create-assembly.dto';
+import { UpdateAssemblyDto } from './dto/update-assembly.dto';
+import { QueryAssemblyDto } from './dto/query-assembly.dto';
+import { CreateAssemblyDetailDto } from './dto/create-assembly-detail.dto';
+import { UpdateAssemblyDetailDto } from './dto/update-assembly-detail.dto';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { ColegioId } from '../../auth/decorators/colegio.decorator';
+```
+
+### Por qué cada import
+
+- `Controller, Get, Post, Put, Delete` — Decoradores HTTP
+- `Body, Param, Query` — Decoradores de parámetros
+- `UseGuards` — Aplica guards de autenticación/autorización
+- `ParseIntPipe` — Convierte string a number, lanza 400 si no es válido
+- `HttpCode, HttpStatus` — Define status code personalizado
+- `ApiTags, ApiOperation, ApiResponse, ApiBearerAuth` — Documentación Swagger
+- `JwtAuthGuard` — Verifica que el JWT sea válido
+- `RolesGuard` — Verifica que el usuario tenga el rol requerido
+- `Roles` — Define qué roles pueden acceder al endpoint
+- `ColegioId` — Extrae el `colegio_id` del JWT token
 
 ---
 
 ## T4.1 — Crear controlador de asambleas
 
-Crear el archivo `src/modules/assemblies/assemblies.controller.ts` con los 8 endpoints REST para el módulo de asambleas.
+Crear `src/modules/assemblies/assemblies.controller.ts` con los 8 endpoints REST del módulo.
 
-### Configuración del controlador
+### Estructura base del controlador
 
-El controlador debe:
-
-- Usar el decorador `@Controller('assemblies')` para definir la ruta base
-- Usar `@UseGuards(AuthGuard, RolesGuard)` para proteger todos los endpoints
-- Inyectar `AssembliesService` en el constructor
-- Importar los decoradores necesarios: `@Get`, `@Post`, `@Put`, `@Delete`, `@Param`, `@Body`, `@Query`, `@Roles`, `@ColegioId`
-
-### Endpoints a implementar
-
-**1. GET `/assemblies`** — Listar asambleas del colegio
-
-- Sin restricción de roles (todos los autenticados pueden ver)
-- Acepta query parameters de paginación y filtros
-- Retorna lista paginada de asambleas
-
-**2. GET `/assemblies/:id`** — Detalle de una asamblea
-
-- Sin restricción de roles (todos los autenticados pueden ver)
-- Acepta parámetro `id` en la URL
-- Retorna asamblea con sus detalles anidados
-
-**3. POST `/assemblies`** — Crear una asamblea
-
-- Restringido a roles: `presidente` y `admin_colegio`
-- Acepta body con datos de la asamblea (usar CreateAssemblyDto)
-- Retorna asamblea creada con status 201
-
-**4. PUT `/assemblies/:id`** — Editar una asamblea
-
-- Restringido a roles: `presidente` y `admin_colegio`
-- Acepta parámetro `id` y body con datos a actualizar (usar UpdateAssemblyDto)
-- Retorna asamblea actualizada
-
-**5. DELETE `/assemblies/:id`** — Eliminar una asamblea
-
-- Restringido a roles: `presidente` y `admin_colegio`
-- Acepta parámetro `id`
-- Retorna mensaje de confirmación con status 200
-
-**6. POST `/assemblies/:id/details`** — Crear un detalle de asamblea
-
-- Restringido a roles: `presidente` y `admin_colegio`
-- Acepta parámetro `id` (ID de la asamblea padre) y body con datos del detalle (usar CreateAssemblyDetailDto)
-- Retorna detalle creado con status 201
-
-**7. PUT `/assemblies/:id/details/:detailId`** — Editar un detalle
-
-- Restringido a roles: `presidente` y `admin_colegio`
-- Acepta parámetros `id` y `detailId`, y body con datos a actualizar (usar UpdateAssemblyDetailDto)
-- Retorna detalle actualizado
-
-**8. DELETE `/assemblies/:id/details/:detailId`** — Eliminar un detalle
-
-- Restringido a roles: `presidente` y `admin_colegio`
-- Acepta parámetros `id` y `detailId`
-- Retorna mensaje de confirmación
-
-### Decoradores de roles
-
-Los endpoints de lectura (GET) no necesitan restricción de roles — cualquier usuario autenticado puede acceder.
-
-Los endpoints de escritura (POST, PUT, DELETE) deben usar:
-```
-@Roles('presidente', 'admin_colegio')
+```typescript
+@ApiTags('Assemblies')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
+@Controller('assemblies')
+export class AssembliesController {
+  constructor(private readonly assembliesService: AssembliesService) {}
+}
 ```
 
-Esto asegura que solo el presidente o el admin del colegio puedan crear, editar o eliminar asambleas y sus detalles.
+### Endpoints de lectura (todos los autenticados)
 
-### Extracción del colegio
+#### GET `/assemblies` — Listar asambleas del colegio
 
-Todos los métodos deben recibir el `colegio_id` del JWT usando el decorador `@ColegioId()`. Este decorator extrae el `colegio_id` del token y lo pasa como parámetro al servicio.
+```typescript
+@Get()
+@Roles(
+  'presidente',
+  'vicepresidente',
+  'tesorero',
+  'secretario',
+  'vocal',
+)
+@ApiOperation({ summary: 'Listar asambleas del colegio' })
+@ApiResponse({ status: 200, description: 'Lista de asambleas con paginación' })
+@ApiResponse({ status: 401, description: 'Token inválido' })
+@ApiResponse({ status: 403, description: 'Permisos insuficientes' })
+findAll(
+  @ColegioId() colegioId: number,
+  @Query() query: QueryAssemblyDto,
+) {
+  return this.assembliesService.findAll(colegioId, query);
+}
+```
 
-**Criterios de aceptación:**
+**Por qué 5 roles:** Todos los miembros de directiva pueden VER asambleas (lectura). Solo presidente puede CREAR/MODIFICAR.
 
-- [ ] Archivo `assemblies.controller.ts` creado
-- [ ] 8 endpoints implementados correctamente
-- [ ] Roles correctos en cada endpoint (lectura: todos, escritura: presidente/admin)
-- [ ] Decorador `@ColegioId()` usado en todos los métodos
-- [ ] Manejo de errores HTTP correcto (404 para no encontrado, 403 para no autorizado)
-- [ ] Los endpoints de escritura retornan status 201 (POST) o 200 (PUT/DELETE)
+#### GET `/assemblies/:id` — Detalle de asamblea
+
+```typescript
+@Get(':id')
+@Roles(
+  'presidente',
+  'vicepresidente',
+  'tesorero',
+  'secretario',
+  'vocal',
+)
+@ApiOperation({ summary: 'Obtener una asamblea por ID con sus detalles' })
+@ApiResponse({ status: 200, description: 'Asamblea encontrada' })
+@ApiResponse({ status: 404, description: 'Asamblea no encontrada' })
+findOne(
+  @Param('id', ParseIntPipe) id: number,
+  @ColegioId() colegioId: number,
+) {
+  return this.assembliesService.findOne(id, colegioId);
+}
+```
+
+**Por qué `ParseIntPipe`:** El parámetro de URL llega como string (`/assemblies/1` → `"1"`). `ParseIntPipe` lo convierte a number y lanza 400 si no es un número válido.
+
+### Endpoints de escritura (solo presidente)
+
+#### POST `/assemblies` — Crear asamblea
+
+```typescript
+@Post()
+@Roles('presidente')
+@HttpCode(HttpStatus.CREATED)
+@ApiOperation({ summary: 'Crear una nueva asamblea' })
+@ApiResponse({ status: 201, description: 'Asamblea creada exitosamente' })
+@ApiResponse({ status: 401, description: 'Token inválido' })
+@ApiResponse({ status: 403, description: 'Permisos insuficientes' })
+create(
+  @Body() dto: CreateAssemblyDto,
+  @ColegioId() colegioId: number,
+) {
+  return this.assembliesService.create(dto, colegioId);
+}
+```
+
+**Por qué `@HttpCode(HttpStatus.CREATED)`:** Por defecto NestJS retorna 200 para POST. El estándar REST es 201 para creación.
+
+#### PUT `/assemblies/:id` — Editar asamblea
+
+```typescript
+@Put(':id')
+@Roles('presidente')
+@ApiOperation({ summary: 'Actualizar una asamblea existente' })
+@ApiResponse({ status: 200, description: 'Asamblea actualizada' })
+@ApiResponse({ status: 404, description: 'Asamblea no encontrada' })
+update(
+  @Param('id', ParseIntPipe) id: number,
+  @Body() dto: UpdateAssemblyDto,
+  @ColegioId() colegioId: number,
+) {
+  return this.assembliesService.update(id, dto, colegioId);
+}
+```
+
+#### DELETE `/assemblies/:id` — Eliminar asamblea (soft delete)
+
+```typescript
+@Delete(':id')
+@Roles('presidente')
+@ApiOperation({ summary: 'Eliminar una asamblea (soft delete)' })
+@ApiResponse({ status: 200, description: 'Asamblea eliminada' })
+@ApiResponse({ status: 404, description: 'Asamblea no encontrada' })
+remove(
+  @Param('id', ParseIntPipe) id: number,
+  @ColegioId() colegioId: number,
+) {
+  return this.assembliesService.remove(id, colegioId);
+}
+```
+
+### Endpoints de detalles anidados
+
+Los detalles son recursos anidados bajo una asamblea. La URL es `/assemblies/:id/details`.
+
+#### POST `/assemblies/:id/details` — Crear detalle
+
+```typescript
+@Post(':id/details')
+@Roles('presidente', 'secretario')
+@HttpCode(HttpStatus.CREATED)
+@ApiOperation({ summary: 'Crear un detalle en una asamblea' })
+@ApiResponse({ status: 201, description: 'Detalle creado' })
+@ApiResponse({ status: 404, description: 'Asamblea no encontrada' })
+createDetail(
+  @Param('id', ParseIntPipe) id: number,
+  @Body() dto: CreateAssemblyDetailDto,
+  @ColegioId() colegioId: number,
+) {
+  return this.assembliesService.createDetail(id, dto, colegioId);
+}
+```
+
+#### PUT `/assemblies/:id/details/:detailId` — Editar detalle
+
+```typescript
+@Put(':id/details/:detailId')
+@Roles('presidente', 'secretario')
+@ApiOperation({ summary: 'Actualizar un detalle de asamblea' })
+@ApiResponse({ status: 200, description: 'Detalle actualizado' })
+@ApiResponse({ status: 404, description: 'Detalle no encontrado' })
+updateDetail(
+  @Param('id', ParseIntPipe) id: number,
+  @Param('detailId', ParseIntPipe) detailId: number,
+  @Body() dto: UpdateAssemblyDetailDto,
+  @ColegioId() colegioId: number,
+) {
+  return this.assembliesService.updateDetail(id, detailId, dto, colegioId);
+}
+```
+
+#### DELETE `/assemblies/:id/details/:detailId` — Eliminar detalle (soft delete)
+
+```typescript
+@Delete(':id/details/:detailId')
+@Roles('presidente')
+@ApiOperation({ summary: 'Eliminar un detalle de asamblea (soft delete)' })
+@ApiResponse({ status: 200, description: 'Detalle eliminado' })
+@ApiResponse({ status: 404, description: 'Detalle no encontrado' })
+removeDetail(
+  @Param('id', ParseIntPipe) id: number,
+  @Param('detailId', ParseIntPipe) detailId: number,
+  @ColegioId() colegioId: number,
+) {
+  return this.assembliesService.removeDetail(id, detailId, colegioId);
+}
+```
+
+### Criterios de aceptación
+
+- [ ] 8 endpoints implementados
+- [ ] `@ApiTags`, `@ApiBearerAuth` en la clase
+- [ ] `@ApiOperation` y `@ApiResponse` en cada endpoint
+- [ ] `@Roles` correctos (lectura: 5 roles, escritura: 2 roles)
+- [ ] `@ColegioId()` en todos los métodos
+- [ ] `@ParseIntPipe` en todos los `@Param` numéricos
+- [ ] Status codes: 201 para POST, 200 para PUT/DELETE
+- [ ] GET `/assemblies/:id` retorna la asamblea con sus detalles anidados
+- [ ] Patrón consistente con `directiva.controller.ts`
+
+---
+
+## Notas importantes
+
+1. **Orden de decoradores:** El orden importa. En NestJS, los decoradores se evalúan de arriba a abajo. Siempre poner `@Roles()` antes de `@ApiOperation()`.
+
+2. **`@ColegioId()` vs `@CurrentUser()`:**
+   - `@ColegioId()` → extrae `colegio_id` del JWT (number | null para super_admin)
+   - `@CurrentUser()` → extrae el objeto usuario completo del JWT
+   - Usar `@ColegioId()` cuando solo necesitas el ID del colegio
+
+3. **No enviar `colegio_id` en body:** El `colegio_id` viene del JWT, no del body. Si el frontend lo envía, se ignora.
+
+4. **Super admin:** Cuando `colegioId` es `null` (super_admin), el servicio puede omitir el filtro de colegio y mostrar datos de todos los colegios.
+
+5. **Swagger:** Cada endpoint DEBE tener `@ApiOperation` y al menos un `@ApiResponse`. Esto genera la documentación automática en `/api/docs`.

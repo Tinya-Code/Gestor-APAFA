@@ -46,8 +46,7 @@ export class AuthController {
     description: 'No pertenece a ningún colegio',
   })
   async login(@Headers('authorization') auth: string) {
-    const data = await this.authService.login(auth);
-    return { data };
+    return this.authService.login(auth);
   }
 
   @Post('logout')
@@ -57,8 +56,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Cerrar sesión' })
   @ApiResponse({ status: 200, description: 'Sesión cerrada exitosamente' })
   async logout() {
-    const data = await this.authService.logout();
-    return { data };
+    return this.authService.logout();
   }
 
   @Get('me')
@@ -77,12 +75,11 @@ export class AuthController {
       is_super_admin: boolean;
     },
   ) {
-    const data = await this.authService.getProfile(
+    return this.authService.getProfile(
       user.id,
       user.colegio_id,
       user.is_super_admin,
     );
-    return { data };
   }
 
   @Post('switch-colegio')
@@ -99,8 +96,7 @@ export class AuthController {
     @CurrentUser() user: { id: number },
     @Body() dto: SwitchColegioDto,
   ) {
-    const data = await this.authService.switchColegio(user.id, dto);
-    return { data };
+    return this.authService.switchColegio(user.id, dto);
   }
 
   @Get('roles')
@@ -111,8 +107,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Lista de roles' })
   @ApiResponse({ status: 403, description: 'Permisos insuficientes' })
   listRoles() {
-    const data = this.authService.listRoles();
-    return { data };
+    return this.authService.listRoles();
   }
 
   @Put('roles/:id')
@@ -129,7 +124,6 @@ export class AuthController {
     @Param('id', ParseIntPipe) usuarioId: number,
     @Body() dto: AsignarRolDto,
   ) {
-    const data = await this.authService.assignRole(usuarioId, dto);
-    return { data };
+    return this.authService.assignRole(usuarioId, dto);
   }
 }

@@ -7,8 +7,11 @@ import {
 import { DatabaseService } from '../../database/database.service';
 import { CreateColegioDto } from './dto/create-colegio.dto';
 import { UpdateColegioDto } from './dto/update-colegio.dto';
-import type { RowDataPacket, ResultSetHeader } from 'mysql2';
-import { executePaginatedQuery } from '../../shared/helpers/pagination.helper';
+import type { ResultSetHeader } from 'mysql2';
+import {
+  executePaginatedQuery,
+  type PaginatedResult,
+} from '../../shared/helpers/pagination.helper';
 import type { ColegioRow } from '../../shared/types/usuario.types';
 
 export interface ColegioEntity {
@@ -35,7 +38,7 @@ export class ColegiosService {
     limit = 10,
     search?: string,
     isActive?: boolean,
-  ): Promise<{ data: ColegioEntity[]; total: number }> {
+  ): Promise<PaginatedResult<ColegioRow>> {
     const baseWhere = 'WHERE deleted_at IS NULL';
     const baseParams: (string | number | boolean)[] = [];
 
@@ -79,7 +82,7 @@ export class ColegiosService {
     );
   }
 
-  async findOne(id: number): Promise<ColegioEntity> {
+  async findOne(id: number): Promise<ColegioRow> {
     const rows = await this.db.query<ColegioRow[]>(
       `SELECT id, name, slug, address, phone, email, logo_url, is_active, created_at, updated_at
        FROM colegio
@@ -94,7 +97,7 @@ export class ColegiosService {
     return rows[0];
   }
 
-  async findBySlug(slug: string): Promise<ColegioEntity> {
+  async findBySlug(slug: string): Promise<ColegioRow> {
     const rows = await this.db.query<ColegioRow[]>(
       `SELECT id, name, slug, address, phone, email, logo_url, is_active, created_at, updated_at
        FROM colegio
@@ -109,7 +112,7 @@ export class ColegiosService {
     return rows[0];
   }
 
-  async create(dto: CreateColegioDto): Promise<ColegioEntity> {
+  async create(dto: CreateColegioDto): Promise<ColegioRow> {
     // Verificar que el slug no exista
     const existente = await this.db.query<ColegioRow[]>(
       'SELECT id FROM colegio WHERE slug = ? AND deleted_at IS NULL',
@@ -138,7 +141,7 @@ export class ColegiosService {
     return this.findOne(insertId);
   }
 
-  async update(id: number, dto: UpdateColegioDto): Promise<ColegioEntity> {
+  async update(id: number, dto: UpdateColegioDto): Promise<ColegioRow> {
     // Verificar que el colegio existe
     const colegio = await this.findOne(id);
 
@@ -205,7 +208,7 @@ export class ColegiosService {
     await this.findOne(id);
 
     // Verificar que no tenga usuarios asociados
-    const usuarios = await this.db.query<RowDataPacket[]>(
+    const usuarios = await this.db.query<ColegioRow[]>(
       'SELECT id FROM usuario_colegio WHERE colegio_id = ?',
       [id],
     );
@@ -217,7 +220,7 @@ export class ColegiosService {
     }
 
     // Verificar que no tenga padres registrados
-    const padres = await this.db.query<RowDataPacket[]>(
+    const padres = await this.db.query<ColegioRow[]>(
       'SELECT id FROM padre WHERE colegio_id = ? AND deleted_at IS NULL',
       [id],
     );
@@ -229,7 +232,7 @@ export class ColegiosService {
     }
 
     // Verificar que no tenga estudiantes registrados
-    const estudiantes = await this.db.query<RowDataPacket[]>(
+    const estudiantes = await this.db.query<ColegioRow[]>(
       'SELECT id FROM estudiante WHERE colegio_id = ? AND deleted_at IS NULL',
       [id],
     );

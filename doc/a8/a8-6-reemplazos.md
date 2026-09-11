@@ -3,7 +3,7 @@
 **Endpoint:** `/api/v1/directiva/reemplazos`
 
 > Permite que un vocal reemplace temporalmente a otro miembro de la directiva (ej: tesorero ausente).
-> Solo el presidente o admin_colegio pueden autorizar reemplazos.
+> Solo el presidente o super_admin pueden autorizar reemplazos.
 
 ---
 
@@ -116,7 +116,7 @@ Authorization: Bearer <jwt>
 
 ## POST `/directiva/reemplazos`
 
-Crear un reemplazo temporal. Solo presidente o admin_colegio pueden autorizar.
+Crear un reemplazo temporal. Solo presidente o super_admin pueden autorizar.
 
 **Request:**
 ```
@@ -186,7 +186,7 @@ Content-Type: application/json
 
 ## PUT `/directiva/reemplazos/:id`
 
-Actualizar un reemplazo (extender fecha, cambiar motivo, desactivar). Solo presidente o admin_colegio.
+Actualizar un reemplazo (extender fecha, cambiar motivo, desactivar). Solo presidente o super_admin.
 
 **Request:**
 ```
@@ -246,7 +246,7 @@ Content-Type: application/json
 
 ## DELETE `/directiva/reemplazos/:id`
 
-Finalizar un reemplazo (el vocal vuelve a solo lectura). Solo presidente o admin_colegio.
+Finalizar un reemplazo (el vocal vuelve a solo lectura). Solo presidente o super_admin.
 
 **Request:**
 ```
@@ -314,7 +314,7 @@ Cuando un vocal tiene un reemplazo activo, el sistema automáticamente cambia su
 
 4. **El vocal no puede reemplazarse a sí mismo**
 
-5. **Solo presidente o admin_colegio pueden autorizar/modificar/finalizar reemplazos**
+5. **Solo presidente o super_admin pueden autorizar/modificar/finalizar reemplazos**
 
 6. **El effective_role se actualiza automáticamente en el JWT**
    - El cambio es inmediato (cache de 30 segundos máximo)

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsOptional, IsString, IsNumber, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -42,4 +42,13 @@ export class QueryDirectivaDto {
   @IsOptional()
   @Type(() => Boolean)
   is_active?: boolean;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Filtrar por colegio (solo super_admin)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  colegio_id?: number;
 }

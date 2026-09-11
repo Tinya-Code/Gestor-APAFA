@@ -242,7 +242,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```json
 {
   "data": [
-    { "name": "admin_colegio", "description": "Administrador del colegio" },
     { "name": "presidente", "description": "Presidente de la APAFA" },
     { "name": "vicepresidente", "description": "Vicepresidente de la APAFA" },
     { "name": "tesorero", "description": "Tesorero de la APAFA" },
@@ -282,7 +281,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 }
 ```
 
-### Response 403 Forbidden (no es admin ni admin_colegio)
+### Response 403 Forbidden (no es admin)
 
 ```json
 {

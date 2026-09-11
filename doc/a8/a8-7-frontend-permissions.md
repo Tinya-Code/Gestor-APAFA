@@ -215,15 +215,15 @@ function getUserPermissions(user: User) {
   
   return {
     canRead: true,  // Todos los roles pueden leer
-    canCreate: ['presidente', 'admin_colegio'].includes(role),
-    canEdit: ['presidente', 'admin_colegio'].includes(role),
-    canDelete: ['presidente', 'admin_colegio'].includes(role),
+    canCreate: ['presidente'].includes(role),
+    canEdit: ['presidente'].includes(role),
+    canDelete: ['presidente'].includes(role),
     
     // Permisos específicos por módulo
-    canAccessFinanzas: ['tesorero', 'presidente', 'admin_colegio'].includes(role),
-    canAccessAsistencia: ['secretario', 'presidente', 'admin_colegio'].includes(role),
-    canManageDirectiva: ['presidente', 'admin_colegio'].includes(role),
-    canManageReemplazos: ['presidente', 'admin_colegio'].includes(role),
+    canAccessFinanzas: ['tesorero', 'presidente'].includes(role),
+    canAccessAsistencia: ['secretario', 'presidente'].includes(role),
+    canManageDirectiva: ['presidente'].includes(role),
+    canManageReemplazos: ['presidente'].includes(role),
   };
 }
 ```
@@ -255,9 +255,6 @@ export function hasPermission(user: User, action: string, resource: string): boo
   // Super admin tiene acceso total
   if (user.is_super_admin) return true;
   
-  // Admin colegio tiene acceso total en su colegio
-  if (role === 'admin_colegio') return true;
-  
   // Verificar permisos específicos
   return PERMISSIONS矩阵[role]?.[resource]?.[action] ?? false;
 }
@@ -274,13 +271,13 @@ export class FinancesComponent {
   get canCreateTransaction(): boolean {
     const user = this.authService.currentUser;
     const role = user.effective_role || user.role;
-    return ['tesorero', 'presidente', 'admin_colegio'].includes(role);
+    return ['tesorero', 'presidente'].includes(role);
   }
   
   get canExportReports(): boolean {
     const user = this.authService.currentUser;
     const role = user.effective_role || user.role;
-    return ['tesorero', 'presidente', 'admin_colegio'].includes(role);
+    return ['tesorero', 'presidente'].includes(role);
   }
 }
 ```
@@ -314,19 +311,19 @@ export const routes: Routes = [
     path: 'panel/finanzas',
     component: FinancesComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['tesorero', 'presidente', 'admin_colegio'] }
+    data: { roles: ['tesorero', 'presidente'] }
   },
   {
     path: 'panel/directiva',
     component: DirectivaComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['presidente', 'admin_colegio'] }
+    data: { roles: ['presidente'] }
   },
   {
     path: 'panel/reemplazos',
     component: ReemplazosComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['presidente', 'admin_colegio'] }
+    data: { roles: ['presidente'] }
   },
   // Rutas de solo lectura (todos los roles autenticados)
   {

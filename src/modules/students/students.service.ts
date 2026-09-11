@@ -31,17 +31,31 @@ export class StudentsService {
   constructor(private readonly db: DatabaseService) {}
 
   async findAll(
-    colegioId: number,
+    colegioId: number | null,
     page = 1,
     limit = 10,
     search?: string,
     grade?: string,
-  ): Promise<{ data: StudentEntity[]; total: number }> {
-    const baseWhere = 'WHERE colegio_id = ? AND deleted_at IS NULL';
-    const baseParams: (string | number)[] = [colegioId];
+  ): Promise<{
+    data: StudentEntity[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      total_pages: number;
+    };
+  }> {
+    // Si colegioId es null (super_admin sin colegio), ver todos los colegios
+    const hasColegioFilter = colegioId != null;
+    const baseWhere = hasColegioFilter
+      ? 'WHERE colegio_id = ? AND deleted_at IS NULL'
+      : 'WHERE deleted_at IS NULL';
+    const baseParams: (string | number | boolean)[] = hasColegioFilter
+      ? [colegioId]
+      : [];
 
     const conditions: string[] = [];
-    const conditionParams: (string | number)[] = [];
+    const conditionParams: (string | number | boolean)[] = [];
 
     if (search) {
       conditions.push('(name LIKE ? OR surname LIKE ?)');
@@ -80,13 +94,19 @@ export class StudentsService {
     );
   }
 
-  async findOne(id: number, colegioId: number): Promise<StudentEntity> {
-    const rows = await this.db.query<EstudianteRow[]>(
-      `SELECT id, colegio_id, name, surname, grade, section, parent_id, created_at, updated_at
-       FROM estudiante
-       WHERE id = ? AND colegio_id = ? AND deleted_at IS NULL`,
-      [id, colegioId],
-    );
+  async findOne(id: number, colegioId: number | null): Promise<StudentEntity> {
+    // Si colegioId es null (super_admin), buscar sin filtro de colegio
+    const hasColegioFilter = colegioId != null;
+    const query = hasColegioFilter
+      ? `SELECT id, colegio_id, name, surname, grade, section, parent_id, created_at, updated_at
+         FROM estudiante
+         WHERE id = ? AND colegio_id = ? AND deleted_at IS NULL`
+      : `SELECT id, colegio_id, name, surname, grade, section, parent_id, created_at, updated_at
+         FROM estudiante
+         WHERE id = ? AND deleted_at IS NULL`;
+    const params = hasColegioFilter ? [id, colegioId] : [id];
+
+    const rows = await this.db.query<EstudianteRow[]>(query, params);
 
     if (!rows.length) {
       throw new NotFoundException('Estudiante no encontrado');

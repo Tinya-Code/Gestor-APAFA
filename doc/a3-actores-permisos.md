@@ -7,12 +7,11 @@
 
 | Actor          | Descripción                                                                                   | Límite                                                            |
 | -------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Super Admin    | Desarrollador con `is_super_admin=true`. Accede a TODOS los colegios.                         | Acceso total al sistema. NUNCA aparece en listados.               |
-| Admin Colegio  | Padre con rol `admin_colegio` en un colegio.                                                  | Acceso total EN SU colegio (bypass deRolesGuard).                 |
-| Presidente     | Padre de familia con rol de Presidente                                                        | Acceso completo al sistema (solo lectura en el panel de tesorero) |
-| Vicepresidente | Padre de familia con rol de Vicepresidente                                                    | Acceso completo al sistema (solo lectura en el panel de tesorero) |
+| Super Admin    | Desarrollador con `is_super_admin=true`. Accede a TODOS los colegios.                         | Acceso total al sistema. Bypass de RolesGuard. NUNCA aparece en listados. |
+| Presidente     | Padre de familia con rol de Presidente                                                        | Acceso completo (excepto panel de tesorero)                       |
+| Vicepresidente | Padre de familia con rol de Vicepresidente                                                    | Acceso completo (excepto panel de tesorero)                       |
 | Tesorero       | Padre con rol de tesorero en la directiva                                                     | Acceso a operaciones financieras                                  |
-| Secretaria/o   | Padre con rol de Secretaria/o                                                                 | Toma de notas y asistencia en Eventos.                            |
+| Secretaria/o   | Padre con rol de Secretaria/o                                                                 | Toma de notas y asistencia en Eventos. Registra detalles de asambleas. |
 | Vocal          | Padre de familia con rol de vocal (apoyo) que puede reemplazar temporalmente a otro miembro de la directiva | Acceso parcial (solo lectura) + permisos del rol reemplazado durante el reemplazo |
 | Padre          | Padre sin rol en directiva                                                                    | Acceso a la pagina web de avisos                                  |
 | Sistema        | Proceso automático sin intervención humana                                                    | Ejecuta multas, notificaciones y reportes automáticos             |
@@ -23,7 +22,7 @@
 
 El rol **Vocal** puede reemplazar temporalmente a otro miembro de la directiva cuando estos están ausentes. Este mecanismo:
 
-- Solo puede ser autorizado por el **Presidente** o **Admin Colegio**
+- Solo puede ser autorizado por el **Presidente** o **Super Admin**
 - Otorga al vocal los permisos del rol que reemplaza (ej: si reemplaza al tesorero, puede operar Finanzas)
 - Es temporal: tiene fecha de inicio y fin (o indefinido hasta que se cancele)
 - Un vocal solo puede tener un reemplazo activo a la vez

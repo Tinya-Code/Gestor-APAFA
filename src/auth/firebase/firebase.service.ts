@@ -20,8 +20,10 @@ export class FirebaseService {
         email: decodedToken.email ?? '',
         name: decodedToken.name ?? decodedToken.email ?? '',
       };
-    } catch (_error) {
-      this.logger.warn('Firebase token verification failed');
+    } catch (error) {
+      this.logger.warn(
+        `Firebase token verification failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new UnauthorizedException('Token de Firebase inválido o expirado');
     }
   }

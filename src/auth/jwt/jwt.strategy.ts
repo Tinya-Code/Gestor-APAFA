@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload) {
     // Super admin: no necesita colegio
     if (payload.is_super_admin) {
-      const [usuarios] = await this.db.query<UsuarioRow[]>(
+      const usuarios = await this.db.query<UsuarioRow[]>(
         'SELECT id, email, name, surname, is_super_admin FROM usuario WHERE id = ? AND deleted_at IS NULL',
         [payload.sub],
       );
@@ -54,7 +54,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Token sin colegio asociado');
     }
 
-    const [usuarios] = await this.db.query<UsuarioRow[]>(
+    const usuarios = await this.db.query<UsuarioRow[]>(
       'SELECT id, email, name, surname, is_super_admin FROM usuario WHERE id = ? AND deleted_at IS NULL',
       [payload.sub],
     );
@@ -65,7 +65,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const usuario = usuarios[0];
 
-    const [usuarioColegios] = await this.db.query<UsuarioColegioRow[]>(
+    const usuarioColegios = await this.db.query<UsuarioColegioRow[]>(
       `SELECT uc.id, uc.usuario_id, uc.colegio_id, uc.role, c.name as colegio_name
        FROM usuario_colegio uc
        JOIN colegio c ON c.id = uc.colegio_id

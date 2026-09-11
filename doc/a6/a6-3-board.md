@@ -33,7 +33,7 @@ detalleMiembro {
 ```
 nuevoMiembro {
   RD.nuevoMiembro();         // parent_id, role, start_date son obligatorios
-  RD.rolValido();            // role debe ser: admin_colegio, presidente, vicepresidente, tesorero, secretario
+  RD.rolValido();            // role debe ser: presidente, vicepresidente, tesorero, secretario, vocal
   RD.padreExiste();          // el padre referenciado debe existir Y PERTENECE AL COLEGIO
   RD.sinRolDuplicado();     // no puede haber dos miembros activos con el mismo rol POR COLEGIO
   insertarMiembro();         // INSERT INTO directiva (parent_id, role, start_date, end_date, colegio_id, created_at, updated_at)

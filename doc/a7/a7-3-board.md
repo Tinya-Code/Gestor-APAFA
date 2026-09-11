@@ -230,7 +230,7 @@ interface ListarReemplazosResponse {
 
 **Reglas de dominio**
 
-- Solo presidente o admin_colegio pueden autorizar (N0, N1)
+- Solo presidente o super_admin pueden autorizar
 - El vocal debe ser vocal activo en el colegio
 - El directivo a reemplazar debe tener el rol indicado y estar activo
 - No puede ser el mismo padre (vocal ≠ reemplazado)
@@ -260,7 +260,7 @@ interface CrearReemplazoResponse {
 
 **Reglas de dominio**
 
-- Solo presidente o admin_colegio pueden modificar (N0, N1)
+- Solo presidente o super_admin pueden modificar
 - Puede extender fecha, cambiar motivo o desactivar
 
 ```ts
@@ -280,7 +280,7 @@ interface ActualizarReemplazoDto {
 
 **Reglas de dominio**
 
-- Solo presidente o admin_colegio pueden finalizar (N0, N1)
+- Solo presidente o super_admin pueden finalizar
 - Desactiva el reemplazo y marca fecha de fin
 - El vocal vuelve a su estado de solo lectura
 

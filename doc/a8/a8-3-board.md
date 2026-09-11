@@ -2,13 +2,39 @@
 
 > **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT.
 
-### GET `/api/v1/board-members`
+## Super Admin — Acceso Multi-Colegio
 
-#### Request
+El super_admin (`is_super_admin=true`) tiene acceso especial:
+
+| Escenario | Comportamiento |
+|---|---|
+| Sin `colegio_id` | Ve TODOS los registros de TODOS los colegios |
+| Con `?colegio_id=N` | Ve solo registros del colegio N |
+| Admin de colegio (no super) | Ve solo registros de su colegio (del JWT) |
+
+---
+
+### GET `/api/v1/directiva`
+
+#### Request (admin de colegio)
 
 ```
-GET /api/v1/board-members?page=1&limit=20 HTTP/1.1
+GET /api/v1/directiva?page=1&limit=20 HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Request (super_admin — todos los colegios)
+
+```
+GET /api/v1/directiva?page=1&limit=20 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  ← token con is_super_admin=true
+```
+
+#### Request (super_admin — colegio específico)
+
+```
+GET /api/v1/directiva?page=1&limit=20&colegio_id=1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  ← token con is_super_admin=true
 ```
 
 #### Response 200 OK
@@ -36,13 +62,20 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ---
 
-### GET `/api/v1/board-members/:id`
+### GET `/api/v1/directiva/:id`
 
-#### Request
+#### Request (admin de colegio)
 
 ```
-GET /api/v1/board-members/1 HTTP/1.1
+GET /api/v1/directiva/1 HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Request (super_admin — colegio específico)
+
+```
+GET /api/v1/directiva/1?colegio_id=2 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  ← token con is_super_admin=true
 ```
 
 #### Response 200 OK

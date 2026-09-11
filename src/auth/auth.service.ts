@@ -5,9 +5,11 @@ import {
   NotFoundException,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FirebaseService } from './firebase/firebase.service';
 import { JwtAuthService } from './jwt/jwt.service';
 import { DatabaseService } from '../database/database.service';
+import { parseExpirationToSeconds } from '../shared/helpers/expiration.helper';
 import { AsignarRolDto } from './dto/asignar-rol.dto';
 import { SwitchColegioDto } from './dto/switch-colegio.dto';
 import type {
@@ -25,19 +27,25 @@ import type {
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly expiresInSeconds: number;
 
   constructor(
+    private readonly configService: ConfigService,
     private readonly firebaseService: FirebaseService,
     private readonly jwtAuthService: JwtAuthService,
     private readonly db: DatabaseService,
-  ) {}
+  ) {
+    this.expiresInSeconds = parseExpirationToSeconds(
+      this.configService.get<string>('JWT_EXPIRATION', '86400'),
+    );
+  }
 
   async login(authHeader: string): Promise<LoginResponse> {
     const firebaseToken = this.extractBearerToken(authHeader);
     const firebaseUser = await this.firebaseService.verifyToken(firebaseToken);
 
     // Buscar usuario por email
-    const [usuarios] = await this.db.query<UsuarioRow[]>(
+    const usuarios = await this.db.query<UsuarioRow[]>(
       'SELECT id, email, name, surname, phone, is_super_admin FROM usuario WHERE email = ? AND deleted_at IS NULL',
       [firebaseUser.email],
     );
@@ -61,7 +69,7 @@ export class AuthService {
       return {
         access_token: accessToken,
         token_type: 'Bearer',
-        expires_in: 86400,
+        expires_in: this.expiresInSeconds,
         user: {
           id: usuario.id,
           email: usuario.email,
@@ -76,7 +84,7 @@ export class AuthService {
     }
 
     // Usuario normal: necesita al menos un colegio
-    const [usuarioColegios] = await this.db.query<UsuarioColegioRow[]>(
+    const usuarioColegios = await this.db.query<UsuarioColegioRow[]>(
       `SELECT uc.id, uc.usuario_id, uc.colegio_id, uc.role, c.name as colegio_name
        FROM usuario_colegio uc
        JOIN colegio c ON c.id = uc.colegio_id
@@ -103,7 +111,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       token_type: 'Bearer',
-      expires_in: 86400,
+      expires_in: this.expiresInSeconds,
       user: {
         id: usuario.id,
         email: usuario.email,
@@ -126,7 +134,7 @@ export class AuthService {
     colegioId: number | null,
     isSuperAdmin: boolean,
   ): Promise<PerfilResponse> {
-    const [usuarios] = await this.db.query<UsuarioRow[]>(
+    const usuarios = await this.db.query<UsuarioRow[]>(
       'SELECT id, email, name, surname, phone, is_super_admin FROM usuario WHERE id = ? AND deleted_at IS NULL',
       [userId],
     );
@@ -158,7 +166,7 @@ export class AuthService {
       throw new UnauthorizedException('Token sin colegio asociado');
     }
 
-    const [usuarioColegios] = await this.db.query<UsuarioColegioRow[]>(
+    const usuarioColegios = await this.db.query<UsuarioColegioRow[]>(
       `SELECT uc.id, uc.usuario_id, uc.colegio_id, uc.role, c.name as colegio_name
        FROM usuario_colegio uc
        JOIN colegio c ON c.id = uc.colegio_id
@@ -191,7 +199,7 @@ export class AuthService {
     dto: SwitchColegioDto,
   ): Promise<SwitchColegioResponse> {
     // Verificar que el usuario existe
-    const [usuarios] = await this.db.query<UsuarioRow[]>(
+    const usuarios = await this.db.query<UsuarioRow[]>(
       'SELECT id, email, name, surname, is_super_admin FROM usuario WHERE id = ? AND deleted_at IS NULL',
       [userId],
     );
@@ -204,7 +212,7 @@ export class AuthService {
 
     // Super admin: puede cambiar a cualquier colegio sin verificar membresía
     if (usuario.is_super_admin) {
-      const [colegios] = await this.db.query<ColegioRow[]>(
+      const colegios = await this.db.query<ColegioRow[]>(
         'SELECT id, name, slug FROM colegio WHERE id = ? AND is_active = 1 AND deleted_at IS NULL',
         [dto.colegio_id],
       );
@@ -226,7 +234,7 @@ export class AuthService {
       return {
         access_token: accessToken,
         token_type: 'Bearer',
-        expires_in: 86400,
+        expires_in: this.expiresInSeconds,
         user: {
           id: usuario.id,
           email: usuario.email,
@@ -241,7 +249,7 @@ export class AuthService {
     }
 
     // Usuario normal: verificar que el colegio existe y está activo
-    const [colegios] = await this.db.query<ColegioRow[]>(
+    const colegios = await this.db.query<ColegioRow[]>(
       'SELECT id, name, slug FROM colegio WHERE id = ? AND is_active = 1 AND deleted_at IS NULL',
       [dto.colegio_id],
     );
@@ -251,7 +259,7 @@ export class AuthService {
     }
 
     // Verificar que el usuario pertenece al colegio
-    const [usuarioColegios] = await this.db.query<UsuarioColegioRow[]>(
+    const usuarioColegios = await this.db.query<UsuarioColegioRow[]>(
       `SELECT uc.id, uc.usuario_id, uc.colegio_id, uc.role, c.name as colegio_name
        FROM usuario_colegio uc
        JOIN colegio c ON c.id = uc.colegio_id
@@ -277,7 +285,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       token_type: 'Bearer',
-      expires_in: 86400,
+      expires_in: this.expiresInSeconds,
       user: {
         id: usuario.id,
         email: usuario.email,
@@ -308,7 +316,7 @@ export class AuthService {
     dto: AsignarRolDto,
   ): Promise<AsignarRolResponse> {
     // Verificar que el usuario existe
-    const [usuarios] = await this.db.query<UsuarioRow[]>(
+    const usuarios = await this.db.query<UsuarioRow[]>(
       'SELECT id FROM usuario WHERE id = ? AND deleted_at IS NULL',
       [usuarioId],
     );
@@ -318,7 +326,7 @@ export class AuthService {
     }
 
     // Verificar que el colegio existe
-    const [colegios] = await this.db.query<ColegioRow[]>(
+    const colegios = await this.db.query<ColegioRow[]>(
       'SELECT id FROM colegio WHERE id = ? AND is_active = 1 AND deleted_at IS NULL',
       [dto.colegio_id],
     );
@@ -328,7 +336,7 @@ export class AuthService {
     }
 
     // Verificar si ya existe la relación
-    const [existente] = await this.db.query<UsuarioColegioRow[]>(
+    const existente = await this.db.query<UsuarioColegioRow[]>(
       'SELECT id FROM usuario_colegio WHERE usuario_id = ? AND colegio_id = ?',
       [usuarioId, dto.colegio_id],
     );

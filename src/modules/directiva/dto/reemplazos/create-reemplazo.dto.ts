@@ -13,7 +13,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
  * Roles que pueden ser reemplazados por un vocal.
  * Un vocal NO puede reemplazar a otro vocal ni a presidente.
  */
-const REEMPLAZABLE_ROLES = ['vicepresidente', 'tesorero', 'secretario'] as const;
+const REEMPLAZABLE_ROLES = [
+  'vicepresidente',
+  'tesorero',
+  'secretario',
+] as const;
 
 export class CreateReemplazoDto {
   @ApiProperty({
@@ -26,7 +30,8 @@ export class CreateReemplazoDto {
 
   @ApiProperty({
     example: 'tesorero',
-    description: 'Rol que será reemplazado (vicepresidente, tesorero o secretario)',
+    description:
+      'Rol que será reemplazado (vicepresidente, tesorero o secretario)',
     enum: REEMPLAZABLE_ROLES,
   })
   @IsString()

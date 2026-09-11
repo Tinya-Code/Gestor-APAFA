@@ -226,14 +226,14 @@ VALUES (
 -- Tiene acceso TOTAL a todos los colegios.
 -- ------------------------------------------------------------
 INSERT INTO `usuario` (`email`, `firebase_uid`, `name`, `surname`, `is_super_admin`)
-VALUES ('dev@gestor-apafa.com', 'firebase-uid-admin', 'Admin', 'Sistema', 1);
+VALUES ('dev@gestor-apafa.com', 'fA56422XqqM7kEkurgD1KBSA7fX2e', 'Admin', 'Sistema', 1);
 
 -- ------------------------------------------------------------
 -- Usuarios de ejemplo (padres)
 -- ------------------------------------------------------------
 INSERT INTO `usuario` (`email`, `firebase_uid`, `name`, `surname`, `phone`)
 VALUES
-  ('alejandroleonpedro7@gmail.com',  'firebase-uid-juan',  'Pedro',  'Pérez',  '+5491155551234'),
+  ('alejandroleonpedro7@gmail.com',  'fA56422XqqM7kEkurgD1KBSA7fX2',  'Pedro',  'Pérez',  '+5491155551234'),
   ('maria.gomez@email.com', 'firebase-uid-maria', 'María', 'Gómez',  '+5491155554321'),
   ('carlos.lopez@email.com','firebase-uid-carlos','Carlos','López',  '+549115556789');
 

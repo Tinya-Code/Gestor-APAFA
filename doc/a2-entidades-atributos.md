@@ -55,7 +55,6 @@
 
 | Rol | Descripción |
 |-----|-------------|
-| `admin_colegio` | Administrador del colegio (acceso total EN ese colegio) |
 | `presidente` | Presidente de la APAFA |
 | `vicepresidente` | Vicepresidente de la APAFA |
 | `tesorero` | Tesorero de la APAFA |
@@ -147,11 +146,6 @@
 - NO tiene colegio asociado
 - Accede a TODOS los colegios desde un panel especial
 - **NUNCA** aparece en listados de padres o directiva
-
-**Admin de Colegio:**
-- Rol `admin_colegio` en `usuario_colegio`
-- Acceso total EN SU colegio
-- No puede ver datos de otros colegios
 
 **Otros roles:**
 - Acceso según la tabla de permisos

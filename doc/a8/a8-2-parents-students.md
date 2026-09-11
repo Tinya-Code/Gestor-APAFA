@@ -2,15 +2,43 @@
 
 > **Multi-Tenant:** Todos los responses incluyen `colegio_id` del token JWT. El DNI es único POR COLEGIO.
 
+## Super Admin — Acceso Multi-Colegio
+
+El super_admin (`is_super_admin=true`) tiene acceso especial:
+
+| Escenario | Comportamiento |
+|---|---|
+| Sin `colegio_id` | Ve TODOS los registros de TODOS los colegios |
+| Con `?colegio_id=N` | Ve solo registros del colegio N |
+| Admin de colegio (no super) | Ve solo registros de su colegio (del JWT) |
+
+> **Nota:** El query param `colegio_id` es opcional y solo funciona para super_admin. Los usuarios normales siempre ven datos de su colegio asignado.
+
+---
+
 ## Padres
 
 ### GET `/api/v1/parents`
 
-#### Request
+#### Request (admin de colegio)
 
 ```
 GET /api/v1/parents?page=1&limit=20&search=garcia HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Request (super_admin — todos los colegios)
+
+```
+GET /api/v1/parents?page=1&limit=20 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  ← token con is_super_admin=true
+```
+
+#### Request (super_admin — colegio específico)
+
+```
+GET /api/v1/parents?page=1&limit=20&colegio_id=1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  ← token con is_super_admin=true
 ```
 
 #### Response 200 OK
@@ -41,11 +69,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ### GET `/api/v1/parents/:id`
 
-#### Request
+#### Request (admin de colegio)
 
 ```
 GET /api/v1/parents/1 HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Request (super_admin — colegio específico)
+
+```
+GET /api/v1/parents/1?colegio_id=2 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  ← token con is_super_admin=true
 ```
 
 #### Response 200 OK
@@ -236,11 +271,25 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ### GET `/api/v1/students`
 
-#### Request
+#### Request (admin de colegio)
 
 ```
 GET /api/v1/students?page=1&limit=20&grade=3ro&section=A HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Request (super_admin — todos los colegios)
+
+```
+GET /api/v1/students?page=1&limit=20 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  ← token con is_super_admin=true
+```
+
+#### Request (super_admin — colegio específico)
+
+```
+GET /api/v1/students?page=1&limit=20&colegio_id=1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  ← token con is_super_admin=true
 ```
 
 #### Response 200 OK
@@ -271,11 +320,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ### GET `/api/v1/students/:id`
 
-#### Request
+#### Request (admin de colegio)
 
 ```
 GET /api/v1/students/1 HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Request (super_admin — colegio específico)
+
+```
+GET /api/v1/students/1?colegio_id=2 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  ← token con is_super_admin=true
 ```
 
 #### Response 200 OK

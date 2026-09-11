@@ -33,13 +33,27 @@ export class ParentsService {
   constructor(private readonly db: DatabaseService) {}
 
   async findAll(
-    colegioId: number,
+    colegioId: number | null,
     page = 1,
     limit = 10,
     search?: string,
-  ): Promise<{ data: ParentEntity[]; total: number }> {
-    const baseWhere = 'WHERE colegio_id = ? AND deleted_at IS NULL';
-    const baseParams: (string | number)[] = [colegioId];
+  ): Promise<{
+    data: ParentEntity[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      total_pages: number;
+    };
+  }> {
+    // Si colegioId es null (super_admin sin colegio), ver todos los colegios
+    const hasColegioFilter = colegioId != null;
+    const baseWhere = hasColegioFilter
+      ? 'WHERE colegio_id = ? AND deleted_at IS NULL'
+      : 'WHERE deleted_at IS NULL';
+    const baseParams: (string | number | boolean)[] = hasColegioFilter
+      ? [colegioId]
+      : [];
 
     let searchClause = '';
     const searchParams: string[] = [];
@@ -73,13 +87,19 @@ export class ParentsService {
     );
   }
 
-  async findOne(id: number, colegioId: number): Promise<ParentEntity> {
-    const rows = await this.db.query<PadreRow[]>(
-      `SELECT id, colegio_id, usuario_id, name, surname, dni, phone, email, created_at, updated_at
-       FROM padre
-       WHERE id = ? AND colegio_id = ? AND deleted_at IS NULL`,
-      [id, colegioId],
-    );
+  async findOne(id: number, colegioId: number | null): Promise<ParentEntity> {
+    // Si colegioId es null (super_admin), buscar sin filtro de colegio
+    const hasColegioFilter = colegioId != null;
+    const query = hasColegioFilter
+      ? `SELECT id, colegio_id, usuario_id, name, surname, dni, phone, email, created_at, updated_at
+         FROM padre
+         WHERE id = ? AND colegio_id = ? AND deleted_at IS NULL`
+      : `SELECT id, colegio_id, usuario_id, name, surname, dni, phone, email, created_at, updated_at
+         FROM padre
+         WHERE id = ? AND deleted_at IS NULL`;
+    const params = hasColegioFilter ? [id, colegioId] : [id];
+
+    const rows = await this.db.query<PadreRow[]>(query, params);
 
     if (!rows.length) {
       throw new NotFoundException('Padre no encontrado');

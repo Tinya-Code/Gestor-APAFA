@@ -13,28 +13,9 @@ import {
   type PaginatedResult,
 } from '../../shared/helpers/pagination.helper';
 import type { RowDataPacket, ResultSetHeader } from 'mysql2';
+import type { ReemplazoRow } from '../../shared/types/directiva-reemplazo.types';
 
-export interface ReemplazoRow extends RowDataPacket {
-  id: number;
-  colegio_id: number;
-  vocal_parent_id: number;
-  replaced_role: string;
-  replaced_parent_id: number;
-  effective_role: string;
-  start_date: string;
-  end_date: string | null;
-  reason: string | null;
-  is_active: number;
-  created_by: number;
-  created_at: string;
-  updated_at: string;
-  vocal_name: string;
-  vocal_surname: string;
-  replaced_name: string;
-  replaced_surname: string;
-  created_by_name: string;
-  created_by_surname: string;
-}
+export type { ReemplazoRow } from '../../shared/types/directiva-reemplazo.types';
 
 @Injectable()
 export class ReemplazosService {
@@ -44,16 +25,17 @@ export class ReemplazosService {
 
   /**
    * Listar reemplazos con filtros y paginación.
+   * Si colegioId es null (super_admin), ver todos los colegios.
    */
   async findAll(
-    colegioId: number,
+    colegioId: number | null,
     query: QueryReemplazoDto,
   ): Promise<PaginatedResult<ReemplazoRow>> {
-    const conditions: string[] = [
-      'r.colegio_id = ?',
-      'r.deleted_at IS NULL',
-    ];
-    const params: (string | number | boolean)[] = [colegioId];
+    const hasColegioFilter = colegioId != null;
+    const conditions: string[] = hasColegioFilter
+      ? ['r.colegio_id = ?', 'r.deleted_at IS NULL']
+      : ['r.deleted_at IS NULL'];
+    const params: (string | number)[] = hasColegioFilter ? [colegioId] : [];
 
     // Filtro por rol reemplazado
     if (query.replaced_role) {
@@ -111,20 +93,32 @@ export class ReemplazosService {
 
   /**
    * Obtener un reemplazo por ID.
+   * Si colegioId es null (super_admin), buscar sin filtro de colegio.
    */
-  async findOne(id: number, colegioId: number): Promise<ReemplazoRow> {
-    const [rows] = await this.db.query<ReemplazoRow[]>(
-      `SELECT r.*,
+  async findOne(id: number, colegioId: number | null): Promise<ReemplazoRow> {
+    const hasColegioFilter = colegioId != null;
+    const query = hasColegioFilter
+      ? `SELECT r.*,
               pv.name as vocal_name, pv.surname as vocal_surname,
               pr.name as replaced_name, pr.surname as replaced_surname,
               u.name as created_by_name, u.surname as created_by_surname
-       FROM directiva_reemplazo r
-       JOIN padre pv ON pv.id = r.vocal_parent_id AND pv.deleted_at IS NULL
-       JOIN padre pr ON pr.id = r.replaced_parent_id AND pr.deleted_at IS NULL
-       JOIN usuario u ON u.id = r.created_by AND u.deleted_at IS NULL
-       WHERE r.id = ? AND r.colegio_id = ? AND r.deleted_at IS NULL`,
-      [id, colegioId],
-    );
+         FROM directiva_reemplazo r
+         JOIN padre pv ON pv.id = r.vocal_parent_id AND pv.deleted_at IS NULL
+         JOIN padre pr ON pr.id = r.replaced_parent_id AND pr.deleted_at IS NULL
+         JOIN usuario u ON u.id = r.created_by AND u.deleted_at IS NULL
+         WHERE r.id = ? AND r.colegio_id = ? AND r.deleted_at IS NULL`
+      : `SELECT r.*,
+              pv.name as vocal_name, pv.surname as vocal_surname,
+              pr.name as replaced_name, pr.surname as replaced_surname,
+              u.name as created_by_name, u.surname as created_by_surname
+         FROM directiva_reemplazo r
+         JOIN padre pv ON pv.id = r.vocal_parent_id AND pv.deleted_at IS NULL
+         JOIN padre pr ON pr.id = r.replaced_parent_id AND pr.deleted_at IS NULL
+         JOIN usuario u ON u.id = r.created_by AND u.deleted_at IS NULL
+         WHERE r.id = ? AND r.deleted_at IS NULL`;
+    const params = hasColegioFilter ? [id, colegioId] : [id];
+
+    const rows = await this.db.query<ReemplazoRow[]>(query, params);
 
     if (!rows.length) {
       throw new NotFoundException('Reemplazo no encontrado');
@@ -149,7 +143,7 @@ export class ReemplazosService {
       await connection.beginTransaction();
 
       // 1. Verificar que el vocal existe y es vocal en el colegio (con lock)
-      const [vocales] = await connection.query<RowDataPacket[]>(
+      const [vocales] = await connection.query<ReemplazoRow[]>(
         `SELECT d.id, d.parent_id, d.role
          FROM directiva d
          WHERE d.parent_id = ? AND d.colegio_id = ? AND d.role = 'vocal'
@@ -165,7 +159,7 @@ export class ReemplazosService {
       }
 
       // 2. Verificar que el directivo a reemplazar existe y tiene el rol indicado (con lock)
-      const [directivos] = await connection.query<RowDataPacket[]>(
+      const [directivos] = await connection.query<ReemplazoRow[]>(
         `SELECT d.id, d.parent_id, d.role
          FROM directiva d
          WHERE d.parent_id = ? AND d.colegio_id = ? AND d.role = ?
@@ -188,7 +182,7 @@ export class ReemplazosService {
       }
 
       // 4. Verificar que no haya un reemplazo activo para el mismo rol (con lock)
-      const [existente] = await connection.query<RowDataPacket[]>(
+      const [existente] = await connection.query<ReemplazoRow[]>(
         `SELECT id FROM directiva_reemplazo
          WHERE replaced_role = ? AND colegio_id = ? AND is_active = 1
          AND (end_date IS NULL OR end_date > NOW())
@@ -204,7 +198,7 @@ export class ReemplazosService {
       }
 
       // 5. Verificar que el vocal no tenga ya un reemplazo activo (con lock)
-      const [vocalActivo] = await connection.query<RowDataPacket[]>(
+      const [vocalActivo] = await connection.query<ReemplazoRow[]>(
         `SELECT id FROM directiva_reemplazo
          WHERE vocal_parent_id = ? AND colegio_id = ? AND is_active = 1
          AND (end_date IS NULL OR end_date > NOW())
@@ -315,7 +309,9 @@ export class ReemplazosService {
 
     this.logger.log(
       `Reemplazo ${id} actualizado en colegio ${colegioId} por usuario ${updatedById}. ` +
-      `Cambios: ${Object.keys(dto).filter(k => dto[k as keyof typeof dto] !== undefined).join(', ')}`,
+        `Cambios: ${Object.keys(dto)
+          .filter((k) => dto[k as keyof typeof dto] !== undefined)
+          .join(', ')}`,
     );
 
     return this.findOne(id, colegioId);
@@ -340,7 +336,7 @@ export class ReemplazosService {
 
     this.logger.log(
       `Reemplazo ${id} finalizado en colegio ${colegioId} por usuario ${deletedById}. ` +
-      `Vocal: ${reemplazo.vocal_parent_id}, Rol reemplazado: ${reemplazo.replaced_role}`,
+        `Vocal: ${reemplazo.vocal_parent_id}, Rol reemplazado: ${reemplazo.replaced_role}`,
     );
 
     return { message: 'Reemplazo finalizado exitosamente' };
@@ -355,7 +351,7 @@ export class ReemplazosService {
     vocalParentId: number,
     colegioId: number,
   ): Promise<string | null> {
-    const [rows] = await this.db.query<RowDataPacket[]>(
+    const rows = await this.db.query<RowDataPacket[]>(
       `SELECT effective_role
        FROM directiva_reemplazo
        WHERE vocal_parent_id = ? AND colegio_id = ? AND is_active = 1

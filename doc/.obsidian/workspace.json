@@ -187,6 +187,8 @@
   },
   "active": "959ad2e4675872fa",
   "lastOpenFiles": [
+    "super-admin-frontend-flow.md",
+    "super-admin-flow.md",
     "tasks/M4-T1-schema.md",
     "tasks/M4-T2-dto.md",
     "a1-definicion-problema.md",
@@ -211,8 +213,6 @@
     "frontend-implementation.md",
     "a6/a6-2-parents-students.md",
     "a6/a6-5-events.md",
-    "a6/a6-3-board.md",
-    "a7/a7-3-board.md",
     "db",
     "tasks",
     "task",

@@ -30,4 +30,13 @@ export class QueryStudentDto {
   @IsOptional()
   @IsString()
   grade?: string;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Filtrar por colegio (solo super_admin)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  colegio_id?: number;
 }

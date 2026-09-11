@@ -131,9 +131,9 @@
 - Puede usar `switch-colegio` para ver datos de un colegio específico
 - **NUNCA** aparece en listados de padres o directiva
 
-### Admin de Colegio (N1)
+### Super Admin
 
-- Rol `admin_colegio` en `usuario_colegio`
-- Acceso total EN SU colegio
-- No puede ver datos de otros colegios
-- Puede gestionar roles dentro de su colegio
+- `is_super_admin = true` en tabla `usuario`
+- Acceso total a TODOS los colegios
+- Bypass de RolesGuard (no necesita permisos específicos)
+- Puede gestionar roles en cualquier colegio

@@ -66,9 +66,8 @@ switchColegio {
 
 ```
 listarRoles {
-  RD.adminOrColegioAdmin();   // N0 (super_admin) o N1 (admin_colegio) pueden listar roles
   RD.esSuperAdmin();          // si es super_admin → lista TODOS los roles del sistema
-  listarRolesColegio();       // si es admin_colegio → lista roles disponibles EN ESE COLEGIO
+  listarRolesColegio();       // si no es super_admin → lista roles disponibles EN ESE COLEGIO
   retornarRoles();            // retorna lista de roles
 }
 ```
@@ -133,7 +132,7 @@ asignarAColegio {
   RD.usuarioNoExiste();       // 404 NOT_FOUND
   validarColegio();           // SELECT * FROM colegio WHERE id = ? AND is_active = 1
   RD.colegioNoExiste();       // 404 NOT_FOUND
-  validarRol();               // el role debe ser válido (admin_colegio, presidente, tesorero, etc.)
+  validarRol();               // el role debe ser válido (presidente, vicepresidente, tesorero, secretario, vocal, padre)
   RD.rolInvalido();           // 400 BAD_REQUEST — rol no válido
   RD.yaPertenece();           // 409 CONFLICT — el usuario ya está en ese colegio
   insertarRelacion();         // INSERT INTO usuario_colegio (usuario_id, colegio_id, role)

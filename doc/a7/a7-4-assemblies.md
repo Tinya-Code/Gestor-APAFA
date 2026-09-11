@@ -9,7 +9,6 @@
 **Reglas de dominio**
 
 - Filtros de fecha opcionales (date_from, date_to)
-- Incluye conteo de detalles registrados
 - Solo retorna asambleas DEL COLEGIO
 
 ```ts
@@ -17,6 +16,7 @@
 interface ListarAsambleasQuery {
   page?: number;
   limit?: number;
+  search?: string;
   date_from?: string;
   date_to?: string;
 }
@@ -27,7 +27,6 @@ interface AsambleaEnLista {
   title: string;
   date: string;
   description: string | null;
-  details_count: number;
 }
 
 interface ListarAsambleasResponse {
@@ -52,7 +51,7 @@ interface ListarAsambleasResponse {
 ```ts
 // Entrada: id de la asamblea (path param)
 
-// Salida
+// Salida (objeto directo, sin wrapper)
 interface DetalleAsamblea {
   id: number;
   title: string;
@@ -64,10 +63,6 @@ interface DetalleAsamblea {
     registration_date: string;
     image_url: string | null;
   }[];
-}
-
-interface AsambleaDetalleResponse {
-  data: DetalleAsamblea;
 }
 ```
 
@@ -88,15 +83,13 @@ interface NuevaAsambleaDto {
   description?: string;
 }
 
-// Salida
+// Salida (objeto directo, sin wrapper)
 interface NuevaAsambleaResponse {
-  data: {
-    id: number;
-    title: string;
-    date: string;
-    description: string | null;
-    created_at: string;
-  };
+  id: number;
+  title: string;
+  date: string;
+  description: string | null;
+  created_at: string;
 }
 ```
 
@@ -125,17 +118,15 @@ interface ActualizarAsambleaDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N0, N1)
+- Solo Super Admin o Presidente
 - Borra lógicamente en cascada: asamblea + detalles
 
 ```ts
 // Entrada: id de la asamblea (path param)
 
-// Salida
+// Salida (objeto directo, sin wrapper)
 interface EliminarAsambleaResponse {
-  data: {
-    message: string;
-  };
+  message: string;
 }
 ```
 
@@ -149,25 +140,24 @@ interface EliminarAsambleaResponse {
 
 - La asamblea debe existir
 - description es obligatorio
-- registration_date se asigna automáticamente con la fecha actual
+- registration_date es obligatorio (formato YYYY-MM-DD)
 
 ```ts
 // Entrada
 interface NuevoDetalleDto {
   description: string;
+  registration_date: string;  // YYYY-MM-DD, obligatorio
   image_url?: string;
 }
 
-// Salida
+// Salida (objeto directo, sin wrapper)
 interface NuevoDetalleResponse {
-  data: {
-    id: number;
-    assembly_id: number;
-    description: string;
-    registration_date: string;
-    image_url: string | null;
-    created_at: string;
-  };
+  id: number;
+  assembly_id: number;
+  description: string;
+  registration_date: string;
+  image_url: string | null;
+  created_at: string;
 }
 ```
 
@@ -183,6 +173,7 @@ interface NuevoDetalleResponse {
 // Entrada
 interface ActualizarDetalleDto {
   description?: string;
+  registration_date?: string;
   image_url?: string;
 }
 
@@ -195,16 +186,14 @@ interface ActualizarDetalleDto {
 
 **Reglas de dominio**
 
-- Solo administradores (N0, N1) o directivos
+- Solo Super Admin o Presidente
 - El detalle debe pertenecer a la asamblea Y AL COLEGIO
 
 ```ts
 // Entrada: id de asamblea y id del detalle (path params)
 
-// Salida
+// Salida (objeto directo, sin wrapper)
 interface EliminarDetalleResponse {
-  data: {
-    message: string;
-  };
+  message: string;
 }
 ```

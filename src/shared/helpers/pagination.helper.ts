@@ -2,11 +2,21 @@ import type { RowDataPacket } from 'mysql2';
 import { DatabaseService } from '../../database/database.service';
 
 /**
- * Resultado paginado genérico.
+ * Información de paginación (formato A8).
+ */
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+}
+
+/**
+ * Resultado paginado genérico (formato A8).
  */
 export interface PaginatedResult<T> {
   data: T[];
-  total: number;
+  pagination: PaginationMeta;
 }
 
 /**
@@ -30,7 +40,7 @@ export function calculatePagination(options: PaginationOptions = {}) {
   const limit = Math.min(Math.max(options.limit ?? 10, 1), maxLimit);
   const offset = (page - 1) * limit;
 
-  return { offset, limit };
+  return { offset, limit, page };
 }
 
 /**
@@ -42,7 +52,7 @@ export function calculatePagination(options: PaginationOptions = {}) {
  * @param countQuery - Query COUNT(*) con los mismos filtros
  * @param countParams - Parámetros de la count query
  * @param options - Opciones de paginación
- * @returns PaginatedResult con data y total
+ * @returns PaginatedResult con data y pagination (formato A8)
  */
 export async function executePaginatedQuery<T extends RowDataPacket>(
   db: DatabaseService,
@@ -52,7 +62,7 @@ export async function executePaginatedQuery<T extends RowDataPacket>(
   countParams: (string | number | boolean)[],
   options: PaginationOptions = {},
 ): Promise<PaginatedResult<T>> {
-  const { offset, limit } = calculatePagination(options);
+  const { offset, limit, page } = calculatePagination(options);
 
   // Agregar LIMIT y OFFSET a la data query
   const fullDataQuery = `${dataQuery} LIMIT ? OFFSET ?`;
@@ -65,6 +75,15 @@ export async function executePaginatedQuery<T extends RowDataPacket>(
   ]);
 
   const total = (countResult[0] as { total?: number })?.total ?? 0;
+  const total_pages = Math.ceil(total / limit);
 
-  return { data: rows, total };
+  return {
+    data: rows,
+    pagination: {
+      page,
+      limit,
+      total,
+      total_pages,
+    },
+  };
 }

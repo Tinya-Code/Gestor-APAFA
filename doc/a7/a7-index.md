@@ -105,8 +105,8 @@ El token es un JWT firmado por el backend con payload: `{ sub, email, role, cole
 ### Multi-Tenant
 
 - Todos los endpoints filtran por `colegio_id` del token JWT
-- El super_admin (N0) puede ver datos de todos los colegios
-- El admin_colegio (N1) solo puede ver datos de su colegio
+- El super_admin (SA) puede ver datos de TODOS los colegios
+- Los roles de directiva solo ven datos de su colegio
 - El DNI de padres es único POR COLEGIO, no global
 
 ### Borrado Lógico

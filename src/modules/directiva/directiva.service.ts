@@ -12,23 +12,10 @@ import {
   executePaginatedQuery,
   type PaginatedResult,
 } from '../../shared/helpers/pagination.helper';
-import type { RowDataPacket } from 'mysql2';
+import type { ResultSetHeader } from 'mysql2';
+import type { DirectivaRow } from '../../shared/types/directiva.types';
 
-export interface DirectivaRow extends RowDataPacket {
-  id: number;
-  colegio_id: number;
-  parent_id: number;
-  role: string;
-  start_date: string;
-  end_date: string | null;
-  notes: string | null;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
-  parent_name: string;
-  parent_surname: string;
-  parent_dni: string;
-}
+export type { DirectivaRow } from '../../shared/types/directiva.types';
 
 @Injectable()
 export class DirectivaService {
@@ -38,13 +25,17 @@ export class DirectivaService {
 
   /**
    * Listar miembros de la directiva con filtros y paginación.
+   * Si colegioId es null (super_admin), ver todos los colegios.
    */
   async findAll(
-    colegioId: number,
+    colegioId: number | null,
     query: QueryDirectivaDto,
   ): Promise<PaginatedResult<DirectivaRow>> {
-    const conditions: string[] = ['d.colegio_id = ?', 'd.deleted_at IS NULL'];
-    const params: (string | number | boolean)[] = [colegioId];
+    const hasColegioFilter = colegioId != null;
+    const conditions: string[] = hasColegioFilter
+      ? ['d.colegio_id = ?', 'd.deleted_at IS NULL']
+      : ['d.deleted_at IS NULL'];
+    const params: (string | number)[] = hasColegioFilter ? [colegioId] : [];
 
     // Filtro por rol
     if (query.role) {
@@ -91,15 +82,22 @@ export class DirectivaService {
 
   /**
    * Obtener un miembro de la directiva por ID.
+   * Si colegioId es null (super_admin), buscar sin filtro de colegio.
    */
-  async findOne(id: number, colegioId: number): Promise<DirectivaRow> {
-    const [rows] = await this.db.query<DirectivaRow[]>(
-      `SELECT d.*, p.name as parent_name, p.surname as parent_surname, p.dni as parent_dni
-       FROM directiva d
-       JOIN padre p ON p.id = d.parent_id AND p.deleted_at IS NULL
-       WHERE d.id = ? AND d.colegio_id = ? AND d.deleted_at IS NULL`,
-      [id, colegioId],
-    );
+  async findOne(id: number, colegioId: number | null): Promise<DirectivaRow> {
+    const hasColegioFilter = colegioId != null;
+    const query = hasColegioFilter
+      ? `SELECT d.*, p.name as parent_name, p.surname as parent_surname, p.dni as parent_dni
+         FROM directiva d
+         JOIN padre p ON p.id = d.parent_id AND p.deleted_at IS NULL
+         WHERE d.id = ? AND d.colegio_id = ? AND d.deleted_at IS NULL`
+      : `SELECT d.*, p.name as parent_name, p.surname as parent_surname, p.dni as parent_dni
+         FROM directiva d
+         JOIN padre p ON p.id = d.parent_id AND p.deleted_at IS NULL
+         WHERE d.id = ? AND d.deleted_at IS NULL`;
+    const params = hasColegioFilter ? [id, colegioId] : [id];
+
+    const rows = await this.db.query<DirectivaRow[]>(query, params);
 
     if (!rows.length) {
       throw new NotFoundException('Miembro de directiva no encontrado');
@@ -117,7 +115,7 @@ export class DirectivaService {
     colegioId: number,
   ): Promise<DirectivaRow> {
     // Verificar que el padre existe y pertenece al colegio
-    const [padres] = await this.db.query<RowDataPacket[]>(
+    const padres = await this.db.query<DirectivaRow[]>(
       'SELECT id FROM padre WHERE id = ? AND colegio_id = ? AND deleted_at IS NULL',
       [dto.parent_id, colegioId],
     );
@@ -127,7 +125,7 @@ export class DirectivaService {
     }
 
     // Verificar que no exista un mandato activo para el mismo rol
-    const [existente] = await this.db.query<RowDataPacket[]>(
+    const existente = await this.db.query<DirectivaRow[]>(
       `SELECT id FROM directiva
        WHERE parent_id = ? AND colegio_id = ? AND role = ? AND deleted_at IS NULL AND is_active = 1`,
       [dto.parent_id, colegioId, dto.role],
@@ -140,7 +138,7 @@ export class DirectivaService {
     }
 
     // Verificar que no haya otro padre con el mismo rol activo
-    const [rolExistente] = await this.db.query<RowDataPacket[]>(
+    const rolExistente = await this.db.query<DirectivaRow[]>(
       `SELECT id, parent_id FROM directiva
        WHERE colegio_id = ? AND role = ? AND deleted_at IS NULL AND is_active = 1 AND end_date IS NULL`,
       [colegioId, dto.role],
@@ -160,7 +158,7 @@ export class DirectivaService {
     }
 
     // Insertar mandato
-    const result: { insertId: number } = await this.db.execute(
+    const result: ResultSetHeader = await this.db.execute(
       `INSERT INTO directiva (colegio_id, parent_id, role, start_date, end_date, notes)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
@@ -193,7 +191,7 @@ export class DirectivaService {
 
     // Si cambia el padre, verificar que existe en el colegio
     if (dto.parent_id && dto.parent_id !== mandato.parent_id) {
-      const [padres] = await this.db.query<RowDataPacket[]>(
+      const padres = await this.db.query<DirectivaRow[]>(
         'SELECT id FROM padre WHERE id = ? AND colegio_id = ? AND deleted_at IS NULL',
         [dto.parent_id, colegioId],
       );
@@ -208,7 +206,7 @@ export class DirectivaService {
     const newParentId = dto.parent_id ?? mandato.parent_id;
 
     if (dto.role || dto.parent_id) {
-      const [conflicto] = await this.db.query<RowDataPacket[]>(
+      const conflicto = await this.db.query<DirectivaRow[]>(
         `SELECT id FROM directiva
          WHERE parent_id = ? AND colegio_id = ? AND role = ? AND deleted_at IS NULL AND is_active = 1 AND id != ?`,
         [newParentId, colegioId, newRole, id],

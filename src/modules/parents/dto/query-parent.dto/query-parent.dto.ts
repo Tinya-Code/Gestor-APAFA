@@ -22,4 +22,13 @@ export class QueryParentDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Filtrar por colegio (solo super_admin)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  colegio_id?: number;
 }

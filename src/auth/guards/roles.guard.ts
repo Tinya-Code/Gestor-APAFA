@@ -63,7 +63,7 @@ export class RolesGuard implements CanActivate {
         effectiveRole = cached.effectiveRole;
       } else {
         // Query optimizada: un solo JOIN en lugar de subquery
-        const [reemplazos] = await this.db.query(
+        const reemplazos = await this.db.query(
           `SELECT dr.effective_role
            FROM directiva_reemplazo dr
            INNER JOIN padre p ON p.id = dr.vocal_parent_id AND p.deleted_at IS NULL
