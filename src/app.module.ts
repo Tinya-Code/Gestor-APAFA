@@ -8,6 +8,8 @@ import { ParentsModule } from './modules/parents/parents.module';
 import { StudentsModule } from './modules/students/students.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { DirectivaModule } from './modules/directiva/directiva.module';
+import { AssembliesModule } from './modules/assemblies/assemblies.module';
+import { AssembliesModule } from './modules/assemblies/assemblies.module';
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import { DirectivaModule } from './modules/directiva/directiva.module';
     ParentsModule,
     StudentsModule,
     DirectivaModule,
+    AssembliesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
