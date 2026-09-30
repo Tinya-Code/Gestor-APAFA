@@ -9,6 +9,7 @@ import { StudentsModule } from './modules/students/students.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { DirectivaModule } from './modules/directiva/directiva.module';
 import { AssembliesModule } from './modules/assemblies/assemblies.module';
+import { TotalPagesModule } from './modules/assemblues/shared/total-pages/total-pages.module';
 import { AssembliesModule } from './modules/assemblies/assemblies.module';
 
 @Module({
@@ -21,6 +22,7 @@ import { AssembliesModule } from './modules/assemblies/assemblies.module';
     StudentsModule,
     DirectivaModule,
     AssembliesModule,
+    TotalPagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

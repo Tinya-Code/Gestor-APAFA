@@ -20,6 +20,14 @@ modules/
       detalle-existe.rd.ts
     shared/
       pagination.ts
+      total-pages/
+        total-pages.service.ts
+        total-pages.controller.ts
+        total-pages.module.ts
+        repository/
+          total-pages.repository.ts
+        interface/
+          total-pages.interface.ts
     assemblies.controller.ts
     assemblies.module.ts
     assemblies.service.ts
