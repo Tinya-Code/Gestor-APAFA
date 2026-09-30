@@ -14,10 +14,15 @@ export function parseExpirationToSeconds(value: string): number {
   }
   const num = parseInt(match[1], 10);
   switch (match[2]) {
-    case 's': return num;
-    case 'm': return num * 60;
-    case 'h': return num * 3600;
-    case 'd': return num * 86400;
-    default: return 86400;
+    case 's':
+      return num;
+    case 'm':
+      return num * 60;
+    case 'h':
+      return num * 3600;
+    case 'd':
+      return num * 86400;
+    default:
+      return 86400;
   }
 }

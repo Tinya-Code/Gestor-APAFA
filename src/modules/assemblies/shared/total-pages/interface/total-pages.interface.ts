@@ -6,5 +6,6 @@ export interface TotalPagesInput {
 }
 
 export interface TotalPagesResponse {
+  total: number;
   totalPages: number;
 }

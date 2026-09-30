@@ -15,6 +15,6 @@ export class TotalPagesService {
       input.date_from,
       input.date_to,
     );
-    return { totalPages };
+    return { total: totalPages.total, totalPages: totalPages.totalPages };
   }
 }

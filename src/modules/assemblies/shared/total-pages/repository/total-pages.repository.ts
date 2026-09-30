@@ -11,7 +11,7 @@ export class TotalPagesRepository {
     limit: number = 10, // limite default de 10
     date_from?: string,
     date_to?: string,
-  ): Promise<number> {
+  ): Promise<{ total: number; totalPages: number }> {
     const params: (string | number)[] = [colegio_id];
 
     let query = `
@@ -31,6 +31,6 @@ export class TotalPagesRepository {
 
     const result = await this.db.query<RowDataPacket[]>(query, params);
     const total = (result[0]?.total as number) || 0;
-    return Math.ceil(total / limit);
+    return { total, totalPages: Math.ceil(total / limit) };
   }
 }

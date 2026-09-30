@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
-import { RuleDomain } from '../../repository/rule-domain/rule-RuleDomain';
+import { RuleDomain } from '../../repository/rule/rule-RuleDomain';
 
 @Injectable()
 export class AsambleaExisteRd {
